@@ -23,4 +23,16 @@ public class NitroxVersionTest
         source.CompareTo(new (2, 2)).Should().Be(-1);
         source.CompareTo(new (3, 1)).Should().Be(-1);
     }
+
+    [TestMethod]
+    [DataRow(1, 8, true)]
+    [DataRow(1, 9, true)]
+    [DataRow(1, 10, false)]
+    [DataRow(2, 8, false)]
+    public void NetworkCompatibility(int major, int minor, bool expected)
+    {
+        NitroxVersion source = new(1, 9);
+
+        source.IsNetworkCompatibleWith(new(major, minor)).Should().Be(expected);
+    }
 }

@@ -99,10 +99,12 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
     private async Task StartMultiplayerAsync(string[]? args = null)
     {
         Log.Info("Launching Subnautica in multiplayer mode");
+        NitroxEntryPatch.TraceStep("StartMultiplayerAsync: command invoked");
         try
         {
             bool setupResult = await Task.Run(async () =>
             {
+                NitroxEntryPatch.TraceStep("StartMultiplayerAsync: entered Task.Run");
                 if (string.IsNullOrWhiteSpace(NitroxUser.GamePath) || !Directory.Exists(NitroxUser.GamePath))
                 {
                     ChangeView(optionsViewModel);
@@ -114,16 +116,19 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
                     LauncherNotifier.Error("Aarrr! Nitrox has walked the plank :(");
                     return false;
                 }
+                NitroxEntryPatch.TraceStep("StartMultiplayerAsync: before WarnIfGameProcessExists");
                 if (GameInspect.WarnIfGameProcessExists(GameInfo.Subnautica) && !keyValueStore.GetIsMultipleGameInstancesAllowed())
                 {
                     return false;
                 }
+                NitroxEntryPatch.TraceStep("StartMultiplayerAsync: before IsOutdatedGameAndNotify");
                 if (await GameInspect.IsOutdatedGameAndNotify(NitroxUser.GamePath, dialogService))
                 {
                     return false;
                 }
 
                 // TODO: The launcher should override FileRead win32 API for the Subnautica process to give it the modified Assembly-CSharp from memory
+                NitroxEntryPatch.TraceStep("StartMultiplayerAsync: before patcher dll copy");
                 try
                 {
                     const string PATCHER_DLL_NAME = "NitroxPatcher.dll";
@@ -145,9 +150,21 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
                 {
                     Log.Error(ex, "Unable to move initialization dll to Managed folder. Still attempting to launch because it might exist from previous runs");
                 }
+                NitroxEntryPatch.TraceStep("StartMultiplayerAsync: after patcher dll copy, before Apply");
 
-                // Try inject Nitrox into Subnautica code.
-                await NitroxEntryPatch.Apply(NitroxUser.GamePath);
+                // Run the dnlib-based injection in an isolated process: a non-standard/obfuscated Assembly-CSharp.dll
+                // can make dnlib crash fatally, which would otherwise take the whole launcher down with it.
+                int patchExitCode = await NitroxEntryPatch.ApplyInIsolatedProcessAsync(NitroxUser.GamePath);
+                if (patchExitCode != 0)
+                {
+                    LauncherNotifier.Error(
+                        patchExitCode is 1
+                            ? "Failed to patch Subnautica for multiplayer. Check nitrox-patch-trace.log for details."
+                            : $"Nitrox crashed while patching Subnautica (exit code {patchExitCode}). Your Subnautica installation may be modified in a way Nitrox cannot support."
+                    );
+                    return false;
+                }
+                NitroxEntryPatch.TraceStep("StartMultiplayerAsync: after Apply");
 
                 if (QModHelper.IsQModInstalled(NitroxUser.GamePath))
                 {
@@ -159,15 +176,18 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
                 return true;
             });
 
+            NitroxEntryPatch.TraceStep($"StartMultiplayerAsync: setupResult={setupResult}");
             if (!setupResult)
             {
                 return;
             }
 
             await StartSubnauticaAsync(args);
+            NitroxEntryPatch.TraceStep("StartMultiplayerAsync: StartSubnauticaAsync returned");
         }
         catch (Exception ex)
         {
+            NitroxEntryPatch.TraceStep($"StartMultiplayerAsync: caught exception {ex}");
             Log.Error(ex, "Error while starting game in multiplayer mode:");
             await dialogService.ShowErrorAsync(ex, "Error while starting game in multiplayer mode");
         }

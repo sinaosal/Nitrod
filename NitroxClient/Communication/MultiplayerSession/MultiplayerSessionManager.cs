@@ -63,22 +63,30 @@ namespace NitroxClient.Communication.MultiplayerSession
             NitroxConsole.DisableConsole = SessionPolicy.DisableConsole;
             Version localVersion = NitroxEnvironment.Version;
             NitroxVersion nitroxVersion = new(localVersion.Major, localVersion.Minor);
-            switch (nitroxVersion.CompareTo(SessionPolicy.NitroxVersionAllowed))
+            int versionComparison = nitroxVersion.CompareTo(SessionPolicy.NitroxVersionAllowed);
+            if (!nitroxVersion.IsNetworkCompatibleWith(SessionPolicy.NitroxVersionAllowed))
             {
-                case -1:
+                if (versionComparison < 0)
+                {
                     Log.Error($"Client is out of date. Server: {SessionPolicy.NitroxVersionAllowed}, Client: {localVersion}");
                     Log.InGame(Language.main.Get("Nitrox_OutOfDateClient")
                                            .Replace("{serverVersion}", SessionPolicy.NitroxVersionAllowed.ToString())
                                            .Replace("{localVersion}", localVersion.ToString()));
                     CurrentState.Disconnect(this);
                     return;
-                case 1:
-                    Log.Error($"Server is out of date. Server: {SessionPolicy.NitroxVersionAllowed}, Client: {localVersion}");
-                    Log.InGame(Language.main.Get("Nitrox_OutOfDateServer")
-                                           .Replace("{serverVersion}", SessionPolicy.NitroxVersionAllowed.ToString())
-                                           .Replace("{localVersion}", localVersion.ToString()));
-                    CurrentState.Disconnect(this);
-                    return;
+                }
+
+                Log.Error($"Server is out of date. Server: {SessionPolicy.NitroxVersionAllowed}, Client: {localVersion}");
+                Log.InGame(Language.main.Get("Nitrox_OutOfDateServer")
+                                       .Replace("{serverVersion}", SessionPolicy.NitroxVersionAllowed.ToString())
+                                       .Replace("{localVersion}", localVersion.ToString()));
+                CurrentState.Disconnect(this);
+                return;
+            }
+
+            if (versionComparison != 0)
+            {
+                Log.Warn($"Connecting across compatible Nitrox versions. Server: {SessionPolicy.NitroxVersionAllowed}, Client: {localVersion}");
             }
 
             CurrentState.NegotiateReservationAsync(this);

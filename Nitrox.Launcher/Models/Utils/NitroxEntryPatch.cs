@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +17,11 @@ public static class NitroxEntryPatch
     public const string NITROX_ASSEMBLY_NAME = "NitroxPatcher.dll";
     public const string GAME_ASSEMBLY_MODIFIED_NAME = "Assembly-CSharp-Nitrox.dll";
 
+    /// <summary>
+    /// Command-line flag handled by <c>Program.Main</c> to run <see cref="Apply"/> as an isolated worker process.
+    /// </summary>
+    public const string APPLY_PATCH_ARG = "--apply-patch";
+
     private const string NITROX_ENTRY_TYPE_NAME = "Main";
     private const string NITROX_ENTRY_METHOD_NAME = "Execute";
 
@@ -24,12 +30,46 @@ public static class NitroxEntryPatch
 
     private const string NITROX_EXECUTE_INSTRUCTION = "System.Void NitroxPatcher.Main::Execute()";
 
+    // Written synchronously (bypassing the buffered log sink) so the last step is on disk even if the process dies instantly.
+    internal static void TraceStep(string step)
+    {
+        try
+        {
+            File.AppendAllText(Path.Combine(Log.LogDirectory, "nitrox-patch-trace.log"), $"{DateTime.Now:O} {step}{Environment.NewLine}");
+        }
+        catch
+        {
+            // Tracing must never be the cause of a failure.
+        }
+    }
+
+    /// <summary>
+    /// Runs <see cref="Apply"/> in a separate child process so a fatal/uncatchable crash while dnlib parses or
+    /// rewrites a non-standard Assembly-CSharp.dll (e.g. obfuscated or hand-modified) cannot take down the launcher.
+    /// </summary>
+    /// <returns>The worker process exit code: 0 on success, 1 on a normal caught exception, anything else indicates a fatal/native crash in the worker.</returns>
+    public static async Task<int> ApplyInIsolatedProcessAsync(string subnauticaBasePath)
+    {
+        string launcherExe = Process.GetCurrentProcess().MainModule?.FileName ?? throw new InvalidOperationException("Unable to determine launcher executable path.");
+
+        TraceStep($"Spawning isolated patch worker for '{subnauticaBasePath}'");
+        ProcessStartInfo startInfo = new(launcherExe) { UseShellExecute = false, CreateNoWindow = true };
+        startInfo.ArgumentList.Add(APPLY_PATCH_ARG);
+        startInfo.ArgumentList.Add(subnauticaBasePath);
+
+        using Process worker = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start isolated patch worker process.");
+        await worker.WaitForExitAsync();
+        TraceStep($"Isolated patch worker exited with code {worker.ExitCode}");
+        return worker.ExitCode;
+    }
+
     /// <summary>
     /// Inject Nitrox entry point into Subnautica's Assembly-CSharp.dll
     /// </summary>
     public static async Task Apply(string subnauticaBasePath)
     {
         ArgumentException.ThrowIfNullOrEmpty(subnauticaBasePath, nameof(subnauticaBasePath));
+        TraceStep("Apply() entered");
 
         string subnauticaManagedPath = Path.Combine(subnauticaBasePath, GameInfo.Subnautica.DataFolder, "Managed");
         string assemblyCSharp = Path.Combine(subnauticaManagedPath, GAME_ASSEMBLY_NAME);
@@ -84,14 +124,20 @@ public static class NitroxEntryPatch
          * }
         */
         // TODO: Find a better way to inject Nitrox entrypoint instead of using file swapping
+        TraceStep("Before ModuleDefMD.Load(assemblyCSharp)");
         using (ModuleDefMD module = ModuleDefMD.Load(assemblyCSharp))
-        using (ModuleDefMD nitroxPatcherAssembly = ModuleDefMD.Load(nitroxPatcherPath))
         {
+            TraceStep("Before ModuleDefMD.Load(nitroxPatcherPath)");
+            using ModuleDefMD nitroxPatcherAssembly = ModuleDefMD.Load(nitroxPatcherPath);
+            TraceStep("Loaded both modules");
+
             TypeDef nitroxMainDefinition = nitroxPatcherAssembly.GetTypes().FirstOrDefault(x => x.Name == NITROX_ENTRY_TYPE_NAME);
             MethodDef executeMethodDefinition = nitroxMainDefinition.Methods.FirstOrDefault(x => x.Name == NITROX_ENTRY_METHOD_NAME);
 
+            TraceStep("Before module.Import(executeMethodDefinition)");
             MemberRef executeMethodReference = module.Import(executeMethodDefinition);
 
+            TraceStep("Before resolving target type/method");
             TypeDef gameInputType = module.GetTypes().First(x => x.FullName == TARGET_TYPE_NAME);
             MethodDef awakeMethod = gameInputType.Methods.First(x => x.Name == TARGET_METHOD_NAME);
 
@@ -100,15 +146,21 @@ public static class NitroxEntryPatch
             if (awakeMethod.Body.Instructions[0].Operand is MemberRef refA && callNitroxExecuteInstruction.Operand is MemberRef refB && refA.FullName == refB.FullName)
             {
                 Log.Warn("Nitrox entry point already patched.");
+                TraceStep("Already patched, returning");
                 return;
             }
 
+            TraceStep("Before Instructions.Insert");
             awakeMethod.Body.Instructions.Insert(0, callNitroxExecuteInstruction);
+
+            TraceStep("Before module.Write (highest-risk dnlib step)");
             module.Write(modifiedAssemblyCSharp);
+            TraceStep("After module.Write");
 
             Log.Debug($"Writing assembly to {GAME_ASSEMBLY_MODIFIED_NAME}");
             File.SetAttributes(assemblyCSharp, System.IO.FileAttributes.Normal);
         }
+        TraceStep("After using-block disposed modules");
 
         // The assembly might be used by other code or some other program might work in it. Retry to be on the safe side.
         Log.Debug($"Deleting {GAME_ASSEMBLY_NAME}");

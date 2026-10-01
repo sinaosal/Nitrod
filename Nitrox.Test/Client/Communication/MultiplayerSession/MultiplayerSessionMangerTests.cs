@@ -1,4 +1,6 @@
 ﻿using FluentAssertions.Events;
+using Nitrox.Model.DataStructures;
+using Nitrox.Model.MultiplayerSession;
 using Nitrox.Model.Subnautica.Packets;
 using Nitrox.Test.Client.Communication.MultiplayerSession;
 using NitroxClient.Communication.Abstract;
@@ -62,6 +64,24 @@ namespace NitroxClient.Communication.MultiplayerSession
 
             // Assert
             multiplayerSession.SessionPolicy.Should().Be(TestConstants.TEST_SESSION_POLICY);
+        }
+
+        [TestMethod]
+        public void ProcessSessionPolicyShouldNegotiateAcrossCompatibleVersions()
+        {
+            // Arrange
+            IClient client = Substitute.For<IClient>();
+            IMultiplayerSessionConnectionState connectionState = Substitute.For<IMultiplayerSessionConnectionState>();
+            IMultiplayerSession multiplayerSession = new MultiplayerSessionManager(client, connectionState);
+            MultiplayerSessionPolicy version18Policy = new(TestConstants.TestSessionId, false, MultiplayerSessionAuthenticationAuthority.SERVER,
+                                                           false, TestConstants.TEST_MAX_PLAYER_CONNECTIONS, new NitroxVersion(1, 8));
+
+            // Act
+            multiplayerSession.ProcessSessionPolicy(version18Policy);
+
+            // Assert
+            connectionState.Received(1).NegotiateReservationAsync(Arg.Any<IMultiplayerSessionConnectionContext>());
+            connectionState.DidNotReceive().Disconnect(Arg.Any<IMultiplayerSessionConnectionContext>());
         }
 
         [TestMethod]

@@ -45,5 +45,16 @@ public readonly struct NitroxVersion : IComparable<NitroxVersion>
         return 0;
     }
 
+    public bool IsNetworkCompatibleWith(NitroxVersion other)
+    {
+        if (CompareTo(other) == 0)
+        {
+            return true;
+        }
+
+        return Major == 1 && other.Major == 1 &&
+               Minor is 8 or 9 && other.Minor is 8 or 9;
+    }
+
     public override string ToString() => $"{Major}.{Minor}";
 }

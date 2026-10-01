@@ -20,7 +20,37 @@ internal static class Program
         AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver.Handler;
         AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += AssemblyResolver.Handler;
 
+        if (TryRunApplyPatchWorker(args, out int workerExitCode))
+        {
+            Environment.Exit(workerExitCode);
+            return;
+        }
+
         LoadAvalonia(args);
+    }
+
+    /// <summary>
+    /// Handles "--apply-patch &lt;subnauticaPath&gt;" by running <see cref="Models.Utils.NitroxEntryPatch.Apply" /> directly
+    /// and exiting, without starting the UI. Used so a fatal dnlib crash only kills this throwaway process.
+    /// </summary>
+    private static bool TryRunApplyPatchWorker(string[] args, out int exitCode)
+    {
+        exitCode = 0;
+        int argIndex = Array.IndexOf(args, Models.Utils.NitroxEntryPatch.APPLY_PATCH_ARG);
+        if (argIndex < 0 || argIndex + 1 >= args.Length)
+        {
+            return false;
+        }
+
+        try
+        {
+            Models.Utils.NitroxEntryPatch.Apply(args[argIndex + 1]).GetAwaiter().GetResult();
+        }
+        catch
+        {
+            exitCode = 1;
+        }
+        return true;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

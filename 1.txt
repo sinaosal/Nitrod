@@ -1,0 +1,191 @@
+[16:43:43.496] [INF] Starting Nitrox Launcher V1.8.1.0+aec1f6e4e1a322b045c701bdb2394bc0dd2afc88 with args "" built on Wednesday, January 7, 2026 6:37:21 PM
+[16:43:44.377] [ERR] Could not locate Subnautica installation directory: 
+ConfigFinder: Configured game path was found empty. Please enter the path to the game installation
+EnvironmentFinder: Configured game path with environment variable SUBNAUTICA_INSTALLATION_PATH was found empty
+SteamFinder: It appears you don't have Subnautica installed
+EpicGamesFinder: Could not find game installation directory from Epic Games installation records. Verify that game has been installed with Epic Games Store
+HeroicGamesFinder: It appears you don't have Subnautica installed
+MicrosoftFinder: Game installation directory 'C:\XboxGames\Subnautica\Content' is invalid. Please enter the path to the 'Subnautica' installation
+DiscordFinder: It appears you don't have Subnautica installed
+[16:43:44.439] [INF] GET request to https://nitrox.rux.gg/api/version/latest
+[16:44:15.755] [ERR] Error while checking game version:
+System.ArgumentException: The value cannot be an empty string or composed entirely of whitespace. (Parameter 'gameInstallDir')
+   at System.ArgumentException.ThrowNullOrWhiteSpaceException(String argument, String paramName)
+   at System.ArgumentException.ThrowIfNullOrWhiteSpace(String argument, String paramName)
+   at Nitrox.Launcher.Models.Utils.GameInspect.IsOutdatedGameAndNotify(String gameInstallDir, DialogService dialogService) in Nitrox.Launcher\Models\Utils\GameInspect.cs:line 23
+[16:44:15.768] [INF] Starting server:
+File: C:\Users\TP\Pictures\nitrozx\Nitrox.Server.Subnautica.exe
+Working directory: C:\Users\TP\Pictures\nitrozx
+Arguments: --save, Goonball, --embedded
+[16:44:15.790] [INF] Starting client IPC "NitroxServer_23492"
+[16:44:22.432] [ERR] Error while checking game version:
+System.ArgumentException: The value cannot be an empty string or composed entirely of whitespace. (Parameter 'gameInstallDir')
+   at System.ArgumentException.ThrowNullOrWhiteSpaceException(String argument, String paramName)
+   at System.ArgumentException.ThrowIfNullOrWhiteSpace(String argument, String paramName)
+   at Nitrox.Launcher.Models.Utils.GameInspect.IsOutdatedGameAndNotify(String gameInstallDir, DialogService dialogService) in Nitrox.Launcher\Models\Utils\GameInspect.cs:line 23
+[16:44:22.432] [INF] Starting server:
+File: C:\Users\TP\Pictures\nitrozx\Nitrox.Server.Subnautica.exe
+Working directory: C:\Users\TP\Pictures\nitrozx
+Arguments: --save, Goonball, --embedded
+[16:44:22.436] [INF] Starting client IPC "NitroxServer_12376"
+[16:44:59.624] [ERR] Error while checking game version:
+System.ArgumentException: The value cannot be an empty string or composed entirely of whitespace. (Parameter 'gameInstallDir')
+   at System.ArgumentException.ThrowNullOrWhiteSpaceException(String argument, String paramName)
+   at System.ArgumentException.ThrowIfNullOrWhiteSpace(String argument, String paramName)
+   at Nitrox.Launcher.Models.Utils.GameInspect.IsOutdatedGameAndNotify(String gameInstallDir, DialogService dialogService) in Nitrox.Launcher\Models\Utils\GameInspect.cs:line 23
+[16:44:59.626] [INF] Starting server:
+File: C:\Users\TP\Pictures\nitrozx\Nitrox.Server.Subnautica.exe
+Working directory: C:\Users\TP\Pictures\nitrozx
+Arguments: --save, Goonball, --embedded
+[16:44:59.633] [INF] Starting client IPC "NitroxServer_14800"
+[16:45:12.039] [INF] Launching Subnautica in multiplayer mode
+[16:46:28.743] [ERR] Error while checking game version:
+System.ArgumentException: The value cannot be an empty string or composed entirely of whitespace. (Parameter 'gameInstallDir')
+   at System.ArgumentException.ThrowNullOrWhiteSpaceException(String argument, String paramName)
+   at System.ArgumentException.ThrowIfNullOrWhiteSpace(String argument, String paramName)
+   at Nitrox.Launcher.Models.Utils.GameInspect.IsOutdatedGameAndNotify(String gameInstallDir, DialogService dialogService) in Nitrox.Launcher\Models\Utils\GameInspect.cs:line 23
+[16:46:28.744] [INF] Starting server:
+File: C:\Users\TP\Pictures\nitrozx\Nitrox.Server.Subnautica.exe
+Working directory: C:\Users\TP\Pictures\nitrozx
+Arguments: --save, Goonball, --embedded
+[16:46:28.748] [INF] Starting client IPC "NitroxServer_23364"
+[16:46:39.174] [INF] Launching Subnautica in multiplayer mode
+[16:46:49.325] [INF] Launching Subnautica in multiplayer mode
+[16:48:06.101] [INF] Launching Subnautica in multiplayer mode
+[16:48:07.820] [INF] Launching Subnautica in multiplayer mode
+[16:50:31.363] [INF] Launching Subnautica in multiplayer mode
+[16:50:31.364] [ERR] !!!Nitrox Launcher Crash!!!
+System.ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter 'index')
+   at Avalonia.Controls.Classes.NotifyChanged()
+   at Avalonia.Controls.Classes.Set(String name, Boolean value)
+   at Nitrox.Launcher.Models.Design.AsyncCommandButtonTagger.BusyState.CommandOnCanExecuteChanged(Object sender, EventArgs e) in Nitrox.Launcher\Models\Design\AsyncCommandButtonTagger.cs:line 66
+   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand`1.ExecuteAsync(T parameter)
+   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand`1.Execute(Object parameter)
+   at Avalonia.Controls.Button.OnClick()
+   at Avalonia.Controls.Button.OnPointerReleased(PointerReleasedEventArgs e)
+   at Avalonia.Reactive.LightweightObservableBase`1.PublishNext(T value)
+   at Avalonia.Interactivity.EventRoute.RaiseEventImpl(RoutedEventArgs e)
+   at Avalonia.Interactivity.EventRoute.RaiseEvent(Interactive source, RoutedEventArgs e)
+   at Avalonia.Interactivity.Interactive.RaiseEvent(RoutedEventArgs e)
+   at Avalonia.Input.MouseDevice.MouseUp(IMouseDevice device, UInt64 timestamp, IInputRoot root, Point p, PointerPointProperties props, KeyModifiers inputModifiers, IInputElement hitTest)
+   at Avalonia.Input.MouseDevice.ProcessRawEvent(RawPointerEventArgs e)
+   at Avalonia.Controls.TopLevel.<>c.<HandleInput>b__150_0(Object state)
+   at Avalonia.Threading.Dispatcher.Send(SendOrPostCallback action, Object arg, Nullable`1 priority)
+[16:50:31.536] [INF] Starting Nitrox Launcher V1.8.1.0+aec1f6e4e1a322b045c701bdb2394bc0dd2afc88 with args "--crash-report" built on Wednesday, January 7, 2026 6:37:21 PM
+[16:50:36.443] [INF] Starting Nitrox Launcher V1.8.1.0+aec1f6e4e1a322b045c701bdb2394bc0dd2afc88 with args "--allow-instances" built on Wednesday, January 7, 2026 6:37:21 PM
+[16:50:56.595] [INF] GET request to https://nitroxblog.rux.gg/wp-json/wp/v2/posts?per_page=8&page=1
+[16:50:57.657] [INF] GET request to https://i0.wp.com/nitroxblog.rux.gg/wp-content/uploads/2025/10/main.jpg?fit=1920%2C1080&ssl=1
+[16:50:57.839] [INF] GET request to https://i0.wp.com/nitroxblog.rux.gg/wp-content/uploads/2025/07/LRoom5.jpg?fit=1920%2C1080&ssl=1
+[16:50:57.892] [INF] GET request to https://i0.wp.com/nitroxblog.rux.gg/wp-content/uploads/2024/05/Big-Aquarium.jpg?fit=1920%2C1080&ssl=1
+[16:50:57.939] [INF] GET request to https://i0.wp.com/nitroxblog.rux.gg/wp-content/uploads/2024/02/image-10.jpg?fit=1282%2C832&ssl=1
+[16:50:57.975] [INF] GET request to https://i0.wp.com/nitroxblog.rux.gg/wp-content/uploads/2023/09/9optimized.jpg?fit=1920%2C1080&ssl=1
+[16:50:58.014] [INF] GET request to https://i0.wp.com/nitroxblog.rux.gg/wp-content/uploads/2022/11/hello2.jpg?fit=2560%2C1440&ssl=1
+[16:50:58.089] [INF] GET request to https://i0.wp.com/nitroxblog.rux.gg/wp-content/uploads/2022/01/unknown.png?fit=1247%2C597&ssl=1
+[16:50:58.138] [INF] GET request to https://i0.wp.com/nitroxblog.rux.gg/wp-content/uploads/2024/08/1M_DOWNLOADS.jpg?fit=1536%2C864&ssl=1
+[16:51:21.620] [INF] Launching Subnautica in multiplayer mode
+[16:51:25.203] [INF] Launching Subnautica in multiplayer mode
+[16:51:27.688] [INF] Found running server "Goonball" (PID: 23364)
+[16:51:27.690] [INF] Starting client IPC "NitroxServer_23364"
+[16:51:33.034] [INF] Starting server:
+File: C:\Users\TP\Pictures\nitrozx\Nitrox.Server.Subnautica.exe
+Working directory: C:\Users\TP\Pictures\nitrozx
+Arguments: --save, Goonball, --embedded
+[16:51:33.039] [INF] Starting client IPC "NitroxServer_11152"
+[17:45:49.514] [INF] Starting Nitrox Launcher V1.9.0.0+7815b4e413aa690041ebf92210447fe1c95a21f8 with args "" built on Wednesday, September 30, 2026 5:43:00 PM
+[17:45:51.549] [WRN] Property or field DisableAutoSave does not exist on type Nitrox.Model.Configuration.SubnauticaServerOptions!
+[17:45:51.549] [WRN] Property or field DisableAutoBackup does not exist on type Nitrox.Model.Configuration.SubnauticaServerOptions!
+[17:45:51.550] [WRN] Property or field SerializerMode does not exist on type Nitrox.Model.Configuration.SubnauticaServerOptions!
+[17:45:51.553] [WRN] Property or field AutoPortForward does not exist on type Nitrox.Model.Configuration.SubnauticaServerOptions!
+[17:45:51.553] [WRN] Property or field LANDiscoveryEnabled does not exist on type Nitrox.Model.Configuration.SubnauticaServerOptions!
+[17:45:51.553] [WRN] Property or field IsEmbedded does not exist on type Nitrox.Model.Configuration.SubnauticaServerOptions!
+[17:46:19.426] [INF] Starting server:
+File: C:\Users\TP\Pictures\goon\Nitrox.Server.Subnautica.exe
+Working directory: C:\Users\TP\Pictures\goon
+Arguments: --save, Goonball, --game-path, C:\Games\Subnautica, --embedded
+[17:46:46.754] [INF] Launching Subnautica in multiplayer mode
+[17:46:49.609] [INF] Launching Subnautica in multiplayer mode
+[17:46:51.706] [INF] Launching Subnautica in multiplayer mode
+[17:46:52.840] [INF] Launching Subnautica in singleplayer mode
+[17:47:11.094] [INF] Launching Subnautica in singleplayer mode
+[17:51:21.599] [INF] Starting Nitrox Launcher V1.9.0.0+7815b4e413aa690041ebf92210447fe1c95a21f8 with args "" built on Wednesday, September 30, 2026 5:49:26 PM
+[17:51:49.872] [INF] Launching Subnautica in multiplayer mode
+[17:51:52.996] [INF] Launching Subnautica in singleplayer mode
+[17:51:53.165] [ERR] Error while starting game in singleplayer mode:
+System.ComponentModel.Win32Exception (740): An error occurred trying to start process 'C:\Games\Subnautica\Subnautica.exe' with working directory 'C:\Games\Subnautica'. The requested operation requires elevation.
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start(ProcessStartInfo startInfo)
+   at Nitrox.Model.Platforms.OS.Shared.ProcessEx.From(ProcessStartInfo startInfo) in Nitrox.Model\Platforms\OS\Shared\ProcessEx.cs:line 53
+   at Nitrox.Model.Platforms.OS.Shared.ProcessEx.Start(String fileName, IEnumerable`1 environmentVariables, String workingDirectory, String commandLine, Boolean createWindow) in Nitrox.Model\Platforms\OS\Shared\ProcessEx.cs:line 99
+   at Nitrox.Model.Platforms.Store.Standalone.StartGameAsync(String pathToGameExe, String launchArguments) in Nitrox.Model\Platforms\Store\Standalone.cs:line 13
+   at Nitrox.Launcher.ViewModels.LaunchGameViewModel.StartGameAsync(GameInfo gameInfo, String[] args) in Nitrox.Launcher\ViewModels\LaunchGameViewModel.cs:line 252
+   at Nitrox.Launcher.ViewModels.LaunchGameViewModel.StartSubnauticaAsync(String[] args) in Nitrox.Launcher\ViewModels\LaunchGameViewModel.cs:line 220
+   at Nitrox.Launcher.ViewModels.LaunchGameViewModel.StartSingleplayerAsync() in Nitrox.Launcher\ViewModels\LaunchGameViewModel.cs:line 86
+[17:55:45.939] [INF] Starting Nitrox Launcher V1.9.0.0+7815b4e413aa690041ebf92210447fe1c95a21f8 with args "" built on Wednesday, September 30, 2026 5:52:56 PM
+[17:56:03.235] [INF] Launching Subnautica in singleplayer mode
+[17:56:50.244] [INF] Launching Subnautica in multiplayer mode
+[17:57:24.578] [INF] Launching Subnautica in multiplayer mode
+[20:46:50.088] [INF] Starting Nitrox Launcher V1.9.0.0+7815b4e413aa690041ebf92210447fe1c95a21f8 with args "" built on Wednesday, September 30, 2026 8:38:04 PM
+[20:46:52.134] [DBG] Game installation was found by ConfigFinder at 'C:\Games\Subnautica'
+[20:46:52.137] [ERR] Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+   at System.IO.Enumeration.FileSystemEnumerator`1.CreateDirectoryHandle(String path, Boolean ignoreNotFound)
+   at System.IO.Enumeration.FileSystemEnumerator`1.Init()
+   at System.IO.Enumeration.FileSystemEnumerator`1..ctor(String directory, Boolean isNormalized, EnumerationOptions options, String expression)
+   at System.IO.Enumeration.FileSystemEnumerable`1..ctor(String directory, FindTransform transform, EnumerationOptions options, Boolean isNormalized, String expression)
+   at System.IO.Enumeration.FileSystemEnumerableFactory.UserFiles(String directory, String expression, EnumerationOptions options)
+   at System.IO.Directory.InternalEnumeratePaths(String path, String searchPattern, SearchTarget searchTarget, EnumerationOptions enumerationOptions)
+   at Nitrox.Model.Platforms.Store.EpicGames.OwnsGame(String gameDirectory) in Nitrox.Model\Platforms\Store\EpicGames.cs:line 24
+[20:47:28.538] [INF] Launching Subnautica in multiplayer mode
+[20:47:57.811] [INF] Starting Nitrox Launcher V1.9.0.0+7815b4e413aa690041ebf92210447fe1c95a21f8 with args "" built on Wednesday, September 30, 2026 8:38:04 PM
+[20:47:59.072] [DBG] Game installation was found by ConfigFinder at 'C:\Games\Subnautica'
+[20:47:59.074] [ERR] Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+   at System.IO.Enumeration.FileSystemEnumerator`1.CreateDirectoryHandle(String path, Boolean ignoreNotFound)
+   at System.IO.Enumeration.FileSystemEnumerator`1.Init()
+   at System.IO.Enumeration.FileSystemEnumerator`1..ctor(String directory, Boolean isNormalized, EnumerationOptions options, String expression)
+   at System.IO.Enumeration.FileSystemEnumerable`1..ctor(String directory, FindTransform transform, EnumerationOptions options, Boolean isNormalized, String expression)
+   at System.IO.Enumeration.FileSystemEnumerableFactory.UserFiles(String directory, String expression, EnumerationOptions options)
+   at System.IO.Directory.InternalEnumeratePaths(String path, String searchPattern, SearchTarget searchTarget, EnumerationOptions enumerationOptions)
+   at Nitrox.Model.Platforms.Store.EpicGames.OwnsGame(String gameDirectory) in Nitrox.Model\Platforms\Store\EpicGames.cs:line 24
+[20:48:03.604] [INF] Launching Subnautica in multiplayer mode
+[20:48:09.777] [INF] Starting Nitrox Launcher V1.9.0.0+7815b4e413aa690041ebf92210447fe1c95a21f8 with args "" built on Wednesday, September 30, 2026 8:38:04 PM
+[20:48:11.096] [DBG] Game installation was found by ConfigFinder at 'C:\Games\Subnautica'
+[20:48:11.098] [ERR] Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+   at System.IO.Enumeration.FileSystemEnumerator`1.CreateDirectoryHandle(String path, Boolean ignoreNotFound)
+   at System.IO.Enumeration.FileSystemEnumerator`1.Init()
+   at System.IO.Enumeration.FileSystemEnumerator`1..ctor(String directory, Boolean isNormalized, EnumerationOptions options, String expression)
+   at System.IO.Enumeration.FileSystemEnumerable`1..ctor(String directory, FindTransform transform, EnumerationOptions options, Boolean isNormalized, String expression)
+   at System.IO.Enumeration.FileSystemEnumerableFactory.UserFiles(String directory, String expression, EnumerationOptions options)
+   at System.IO.Directory.InternalEnumeratePaths(String path, String searchPattern, SearchTarget searchTarget, EnumerationOptions enumerationOptions)
+   at Nitrox.Model.Platforms.Store.EpicGames.OwnsGame(String gameDirectory) in Nitrox.Model\Platforms\Store\EpicGames.cs:line 24
+[20:48:22.141] [INF] GET request to https://nitrox.rux.gg/api/changelog/releases
+[20:48:23.857] [DBG] HTTP response status:OK from https://nitrox.rux.gg/api/changelog/releases
+[20:48:42.930] [INF] Launching Subnautica in multiplayer mode
+[20:48:51.050] [INF] Starting Nitrox Launcher V1.9.0.0+7815b4e413aa690041ebf92210447fe1c95a21f8 with args "" built on Wednesday, September 30, 2026 8:38:04 PM
+[20:48:52.300] [DBG] Game installation was found by ConfigFinder at 'C:\Games\Subnautica'
+[20:48:52.303] [ERR] Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+   at System.IO.Enumeration.FileSystemEnumerator`1.CreateDirectoryHandle(String path, Boolean ignoreNotFound)
+   at System.IO.Enumeration.FileSystemEnumerator`1.Init()
+   at System.IO.Enumeration.FileSystemEnumerator`1..ctor(String directory, Boolean isNormalized, EnumerationOptions options, String expression)
+   at System.IO.Enumeration.FileSystemEnumerable`1..ctor(String directory, FindTransform transform, EnumerationOptions options, Boolean isNormalized, String expression)
+   at System.IO.Enumeration.FileSystemEnumerableFactory.UserFiles(String directory, String expression, EnumerationOptions options)
+   at System.IO.Directory.InternalEnumeratePaths(String path, String searchPattern, SearchTarget searchTarget, EnumerationOptions enumerationOptions)
+   at Nitrox.Model.Platforms.Store.EpicGames.OwnsGame(String gameDirectory) in Nitrox.Model\Platforms\Store\EpicGames.cs:line 24
+[20:50:50.979] [INF] Starting Nitrox Launcher V1.9.0.0+7815b4e413aa690041ebf92210447fe1c95a21f8 with args "" built on Wednesday, September 30, 2026 8:38:04 PM
+[20:50:52.211] [DBG] Game installation was found by ConfigFinder at 'C:\Games\Subnautica'
+[20:50:52.213] [ERR] Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\Games\Subnautica\.egstore'.
+   at System.IO.Enumeration.FileSystemEnumerator`1.CreateDirectoryHandle(String path, Boolean ignoreNotFound)
+   at System.IO.Enumeration.FileSystemEnumerator`1.Init()
+   at System.IO.Enumeration.FileSystemEnumerator`1..ctor(String directory, Boolean isNormalized, EnumerationOptions options, String expression)
+   at System.IO.Enumeration.FileSystemEnumerable`1..ctor(String directory, FindTransform transform, EnumerationOptions options, Boolean isNormalized, String expression)
+   at System.IO.Enumeration.FileSystemEnumerableFactory.UserFiles(String directory, String expression, EnumerationOptions options)
+   at System.IO.Directory.InternalEnumeratePaths(String path, String searchPattern, SearchTarget searchTarget, EnumerationOptions enumerationOptions)
+   at Nitrox.Model.Platforms.Store.EpicGames.OwnsGame(String gameDirectory) in Nitrox.Model\Platforms\Store\EpicGames.cs:line 24
+[20:50:54.558] [INF] Launching Subnautica in singleplayer mode
+[20:50:54.583] [DBG] Removing Nitrox entry point from Subnautica
+[20:50:54.675] [DBG] Nitrox entry point not found in PlatformUtils:Awake
+[20:52:49.047] [INF] Launching Subnautica in multiplayer mode
+
