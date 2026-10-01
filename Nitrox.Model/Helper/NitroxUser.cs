@@ -15,6 +15,7 @@ public static class NitroxUser
 {
     public const string LAUNCHER_PATH_ENV_KEY = "NITROX_LAUNCHER_PATH";
     private const string PREFERRED_GAMEPATH_KEY = "PreferredGamePath";
+    private const string PREFER_DIRECT_LAUNCH_KEY = "PreferDirectLaunch";
     private static string gamePath = "";
 
     private static readonly IEnumerable<Func<string>> launcherPathDataSources = new List<Func<string>>
@@ -86,6 +87,12 @@ public static class NitroxUser
     {
         get => KeyValueStore.Instance.GetValue<string>(PREFERRED_GAMEPATH_KEY);
         set => KeyValueStore.Instance.SetValue(PREFERRED_GAMEPATH_KEY, value);
+    }
+
+    public static bool PreferDirectLaunch
+    {
+        get => KeyValueStore.Instance.GetValue(PREFER_DIRECT_LAUNCH_KEY, false);
+        set => KeyValueStore.Instance.SetValue(PREFER_DIRECT_LAUNCH_KEY, value);
     }
 
     public static IGamePlatform? GamePlatform { get; private set; }
@@ -168,9 +175,9 @@ public static class NitroxUser
         }
     }
 
-    public static void SetGamePathAndPlatform(string path, IGamePlatform? platform)
+    public static void SetGamePathAndPlatform(string path, IGamePlatform? platform, bool launchDirectly = false)
     {
         gamePath = Path.GetFullPath(path);
-        GamePlatform = platform ?? GamePlatforms.GetPlatformByGameDir(path);
+        GamePlatform = launchDirectly ? null : platform ?? GamePlatforms.GetPlatformByGameDir(path);
     }
 }

@@ -51,7 +51,7 @@
                     Background="{DynamicResource BrandPanelBackground}"
                     CornerRadius="12"
                     Padding="22,15">
-                    <Grid ColumnDefinitions=" Auto, *, Auto">
+                    <Grid ColumnDefinitions="Auto, *, Auto, Auto" RowDefinitions="Auto, Auto">
                         <controls:RecolorImage
                             Grid.Column="0"
                             Height="36" Width="36"
@@ -77,12 +77,35 @@
                         <Button
                             Classes="primary"
                             Command="{Binding SetGamePathCommand}"
-                            Content="Change"
+                            Content="Choose folder"
                             Grid.Column="2"
                             HorizontalAlignment="Right"
                             Margin="22,0,0,0"
-                            ToolTip.Tip="Direct the launcher to your game's install location"
-                            Width="120" />
+                            ToolTip.Tip="Select the game's installation directory"
+                            Width="130" />
+                        <Button
+                            Classes="primary"
+                            Command="{Binding SetGameExecutableCommand}"
+                            Content="Choose executable"
+                            Grid.Column="3"
+                            HorizontalAlignment="Right"
+                            Margin="10,0,0,0"
+                            ToolTip.Tip="Select Subnautica.exe directly"
+                            Width="150" />
+                        <StackPanel
+                            Grid.Column="1"
+                            Grid.ColumnSpan="3"
+                            Grid.Row="1"
+                            HorizontalAlignment="Right"
+                            Margin="0,14,0,0"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                            <TextBlock Text="Launch directly without Steam" VerticalAlignment="Center" />
+                            <CheckBox
+                                Classes="switch"
+                                IsChecked="{Binding LaunchDirectly}"
+                                ToolTip.Tip="Start Subnautica.exe directly without opening or checking Steam" />
+                        </StackPanel>
                     </Grid>
                 </Border>
             </StackPanel>

@@ -34,17 +34,18 @@ public static class GameInstallationFinder
     /// </summary>
     public static GameFinderResult FindGameCached(GameInfo gameInfo, GameLibraries gameLibraries = GameLibraries.ALL)
     {
-        if (!string.IsNullOrWhiteSpace(NitroxUser.GamePath) && NitroxUser.GamePlatform is { } platform)
+        if (!string.IsNullOrWhiteSpace(NitroxUser.GamePath))
         {
             return GameFinderResult.Ok(NitroxUser.GamePath) with
             {
-                Origin = platform switch
+                Origin = NitroxUser.GamePlatform switch
                 {
                     Steam => GameLibraries.STEAM,
                     EpicGames => GameLibraries.EPIC,
                     HeroicGames => GameLibraries.HEROIC,
                     MSStore => GameLibraries.MICROSOFT,
                     Discord => GameLibraries.DISCORD,
+                    null => GameLibraries.CONFIG,
                     _ => throw new ArgumentOutOfRangeException()
                 }
             };
@@ -55,7 +56,12 @@ public static class GameInstallationFinder
         if (potentiallyValidResult is { IsOk: true })
         {
             Log.Debug($"Game installation was found by {potentiallyValidResult.FinderName} at '{potentiallyValidResult.Path}'");
-            NitroxUser.SetGamePathAndPlatform(potentiallyValidResult.Path, GamePlatforms.GetPlatformByFlag(potentiallyValidResult.Origin) ?? GamePlatforms.GetPlatformByGameDir(potentiallyValidResult.Path));
+            bool isPreferredPath = !string.IsNullOrWhiteSpace(NitroxUser.PreferredGamePath) && Path.GetFullPath(NitroxUser.PreferredGamePath).Equals(potentiallyValidResult.Path, StringComparison.OrdinalIgnoreCase);
+            NitroxUser.SetGamePathAndPlatform(
+                potentiallyValidResult.Path,
+                GamePlatforms.GetPlatformByFlag(potentiallyValidResult.Origin) ?? GamePlatforms.GetPlatformByGameDir(potentiallyValidResult.Path),
+                isPreferredPath && NitroxUser.PreferDirectLaunch
+            );
             return potentiallyValidResult;
         }
 

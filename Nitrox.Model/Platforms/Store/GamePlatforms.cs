@@ -9,11 +9,11 @@ public static class GamePlatforms
 {
     private static readonly Dictionary<GameLibraries, IGamePlatform> allPlatforms = new()
     {
-        { GameLibraries.STEAM, new Steam() },
         { GameLibraries.EPIC, new EpicGames() },
         { GameLibraries.HEROIC, new HeroicGames() },
         { GameLibraries.MICROSOFT, new MSStore() },
-        { GameLibraries.DISCORD, new Discord() }
+        { GameLibraries.DISCORD, new Discord() },
+        { GameLibraries.STEAM, new Steam() }
     };
 
     public static IGamePlatform? GetPlatformByFlag(GameLibraries gameLibraries) => allPlatforms.GetValueOrDefault(gameLibraries);

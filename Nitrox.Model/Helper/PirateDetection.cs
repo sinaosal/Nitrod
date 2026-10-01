@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Nitrox.Model.Platforms.OS.Shared;
+using Nitrox.Model.Platforms.Store;
 
 namespace Nitrox.Model.Helper
 {
@@ -18,7 +19,6 @@ namespace Nitrox.Model.Helper
             {
                 pirateDetected += value;
 
-                // Invoke new subscriber immediately if pirate has already been detected.
                 if (HasTriggered)
                 {
                     value?.Invoke(null, EventArgs.Empty);
@@ -29,6 +29,9 @@ namespace Nitrox.Model.Helper
 
         public static bool TriggerOnDirectory(string subnauticaRoot)
         {
+#if DEBUG
+            return false;
+#else
             if (!IsPirateByDirectory(subnauticaRoot))
             {
                 return false;
@@ -36,18 +39,24 @@ namespace Nitrox.Model.Helper
 
             OnPirateDetected();
             return true;
+#endif
         }
 
         private static event EventHandler pirateDetected;
 
         private static bool IsPirateByDirectory(string subnauticaRoot)
         {
+            if (GamePlatforms.GetPlatformByGameDir(subnauticaRoot) is { } platform && platform is not Steam)
+            {
+                return false;
+            }
+
             string subdirDll = Path.Combine(subnauticaRoot, GameInfo.Subnautica.DataFolder, "Plugins", "x86_64", "steam_api64.dll");
             if (File.Exists(subdirDll) && !FileSystem.Instance.IsTrustedFile(subdirDll))
             {
                 return true;
             }
-            // Dlls might be in root if cracked game (to override DLLs in sub directories).
+
             string rootDll = Path.Combine(subnauticaRoot, "steam_api64.dll");
             if (File.Exists(rootDll) && !FileSystem.Instance.IsTrustedFile(rootDll))
             {

@@ -57,7 +57,7 @@
 
     <!-- *************** BUILD *************** -->
     
-    <Target Name="_NitroxMoveDependenciesToLib" AfterTargets="$(_NitroxBuildTaskName)">
+    <Target Name="_NitroxMoveDependenciesToLib" AfterTargets="$(_NitroxBuildTaskName)" Condition="'$(SelfContained)' != 'true'">
         <Message Importance="High"
                  Text="Running $(_NitroxMoveDependenciesToLibTaskName) on $(MSBuildProjectName)" />
         

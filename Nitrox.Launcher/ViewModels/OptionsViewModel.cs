@@ -1,10 +1,12 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Platform.Storage;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -63,12 +65,16 @@ internal partial class OptionsViewModel(IKeyValueStore keyValueStore, StorageSer
     [ObservableProperty]
     public partial bool IsInReleaseMode { get; set; }
 
+    [ObservableProperty]
+    public partial bool LaunchDirectly { get; set; }
+
     private static string DefaultLaunchArg => "-vrmode none";
     private bool isResettingArgs;
 
     internal override async Task ViewContentLoadAsync(CancellationToken cancellationToken = default)
     {
         SelectedGame = new() { PathToGame = NitroxUser.GamePath, Platform = NitroxUser.GamePlatform?.Platform ?? Platform.NONE };
+        LaunchDirectly = NitroxUser.PreferDirectLaunch;
         LaunchArgs = keyValueStore.GetLaunchArguments(GameInfo.Subnautica, DefaultLaunchArg);
         ProgramDataPath = NitroxDirectory.ConfigPath;
         ScreenshotsPath = NitroxDirectory.ScreenshotsPath;
@@ -108,22 +114,52 @@ internal partial class OptionsViewModel(IKeyValueStore keyValueStore, StorageSer
 
         // Save game path as preferred for future sessions.
         NitroxUser.PreferredGamePath = path;
-        NitroxUser.SetGamePathAndPlatform(path, null);
+        NitroxUser.SetGamePathAndPlatform(path, null, NitroxUser.PreferDirectLaunch);
     }
 
     [RelayCommand]
     private async Task SetGamePath()
     {
         string selectedDirectory = await storageService.OpenFolderPickerAsync("Select Subnautica installation directory", SelectedGame.PathToGame);
-        if (selectedDirectory == "")
+        await ApplyGamePathAsync(selectedDirectory);
+    }
+
+    [RelayCommand]
+    private async Task SetGameExecutable()
+    {
+        string selectedExecutable = (await storageService.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = $"Select {GameInfo.Subnautica.ExeName}",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Subnautica executable")
+                {
+                    Patterns = [GameInfo.Subnautica.ExeName]
+                }
+            ]
+        })).FirstOrDefault()?.TryGetLocalPath() ?? "";
+
+        await ApplyGamePathAsync(selectedExecutable, true);
+    }
+
+    private async Task ApplyGamePathAsync(string selectedPath, bool enableDirectLaunch = false)
+    {
+        if (selectedPath == "")
         {
             return;
         }
 
-        if (!GameInstallationHelper.HasGameExecutable(selectedDirectory, GameInfo.Subnautica))
+        string? selectedDirectory = GameInstallationHelper.GetGameDirectory(selectedPath, GameInfo.Subnautica);
+        if (selectedDirectory == null)
         {
-            LauncherNotifier.Error("Invalid subnautica directory");
+            LauncherNotifier.Error($"Select a Subnautica installation directory or {GameInfo.Subnautica.ExeName}");
             return;
+        }
+
+        if (enableDirectLaunch)
+        {
+            LaunchDirectly = true;
         }
 
         if (!selectedDirectory.Equals(SelectedGame.PathToGame, StringComparison.OrdinalIgnoreCase))
@@ -211,5 +247,17 @@ internal partial class OptionsViewModel(IKeyValueStore keyValueStore, StorageSer
     partial void OnIsDiscordEnabledChanged(bool value)
     {
         keyValueStore.SetIsDiscordEnabled(value);
+    }
+
+    partial void OnLaunchDirectlyChanged(bool value)
+    {
+        NitroxUser.PreferDirectLaunch = value;
+        if (SelectedGame == null || string.IsNullOrWhiteSpace(SelectedGame.PathToGame))
+        {
+            return;
+        }
+
+        NitroxUser.SetGamePathAndPlatform(SelectedGame.PathToGame, null, value);
+        SelectedGame = new() { PathToGame = NitroxUser.GamePath, Platform = NitroxUser.GamePlatform?.Platform ?? Platform.NONE };
     }
 }

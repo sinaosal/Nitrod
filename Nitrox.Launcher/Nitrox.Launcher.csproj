@@ -115,6 +115,9 @@
         <ItemGroup Condition="'$(Configuration)' != 'Debug' AND '$(RuntimeIdentifier)' != ''">
             <_FilesToCopy Include="$(MSBuildProjectDirectory)\..\Nitrox.Server.Subnautica\bin\Release\$(TargetFramework)\$(RuntimeIdentifier)\lib\Microsoft.Extensions.*.dll" />
         </ItemGroup>
+        <ItemGroup Condition="'$(SelfContained)' == 'true'">
+            <_FilesToCopy Include="$(MSBuildProjectDirectory)\..\Nitrox.Server.Subnautica\bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\Microsoft.Extensions.*.dll" />
+        </ItemGroup>
 
         <Warning Text="Unable to find Microsoft.Extensions.* dll files from Nitrox.Server.Subnautica"
                Condition="@(_FilesToCopy->Count()) == 0" />

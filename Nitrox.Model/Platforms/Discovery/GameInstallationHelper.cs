@@ -5,6 +5,26 @@ namespace Nitrox.Model.Platforms.Discovery;
 
 public static class GameInstallationHelper
 {
+    public static string? GetGameDirectory(string path, GameInfo gameInfo)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        string gameDirectory = Path.GetFullPath(path);
+        if (File.Exists(gameDirectory))
+        {
+            if (!Path.GetFileName(gameDirectory).Equals(gameInfo.ExeName, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+            gameDirectory = Path.GetDirectoryName(gameDirectory)!;
+        }
+
+        return HasGameExecutable(gameDirectory, gameInfo) ? gameDirectory : null;
+    }
+
     public static bool HasGameExecutable(string path, GameInfo gameInfo)
     {
         if (string.IsNullOrWhiteSpace(path))
