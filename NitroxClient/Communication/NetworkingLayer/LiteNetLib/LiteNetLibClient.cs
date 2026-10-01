@@ -125,6 +125,7 @@ public class LiteNetLibClient : IClient
 
     private void Disconnected(NetPeer peer, DisconnectInfo disconnectInfo)
     {
+        Log.Warn($"Disconnected from server. Reason: {disconnectInfo.Reason}, Socket error: {disconnectInfo.SocketErrorCode}, Additional data available: {disconnectInfo.AdditionalData.AvailableBytes > 0}");
         // Check must happen before IsConnected is set to false, so that it doesn't send an exception when we aren't even ingame
         if (Multiplayer.Active)
         {
@@ -132,7 +133,6 @@ public class LiteNetLibClient : IClient
         }
 
         IsConnected = false;
-        Log.Info("Disconnected from server");
     }
 
     internal void ForceUpdate()

@@ -49,6 +49,7 @@ namespace NitroxClient.MonoBehaviours
 
         public void Awake()
         {
+            Log.Info($"Multiplayer.Awake entered. Scene: {SceneManager.GetActiveScene().name}");
             client = NitroxServiceLocator.LocateService<IClient>();
             multiplayerSession = NitroxServiceLocator.LocateService<IMultiplayerSession>();
             packetReceiver = NitroxServiceLocator.LocateService<PacketReceiver>();
@@ -60,9 +61,33 @@ namespace NitroxClient.MonoBehaviours
 
             Main = this;
             DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += DiagnosticSceneLoaded;
+            SceneManager.activeSceneChanged += DiagnosticActiveSceneChanged;
 
             Log.Info("Multiplayer client loaded…");
             Log.InGame(Language.main.Get("Nitrox_MultiplayerLoaded"));
+        }
+
+        public void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= DiagnosticSceneLoaded;
+            SceneManager.activeSceneChanged -= DiagnosticActiveSceneChanged;
+            Log.Warn($"Multiplayer object destroyed. Scene: {SceneManager.GetActiveScene().name}, Connected: {client?.IsConnected}, Stage: {multiplayerSession?.CurrentState?.CurrentStage}");
+        }
+
+        public void OnApplicationQuit()
+        {
+            Log.Warn($"Application quit requested. Scene: {SceneManager.GetActiveScene().name}, Connected: {client?.IsConnected}, Stage: {multiplayerSession?.CurrentState?.CurrentStage}");
+        }
+
+        private static void DiagnosticSceneLoaded(Scene scene, LoadSceneMode loadMode)
+        {
+            Log.Info($"Scene loaded. Name: {scene.name}, Mode: {loadMode}, Active scene: {SceneManager.GetActiveScene().name}");
+        }
+
+        private static void DiagnosticActiveSceneChanged(Scene previousScene, Scene nextScene)
+        {
+            Log.Info($"Active scene changed from {previousScene.name} to {nextScene.name}");
         }
 
         public void Update()
@@ -89,15 +114,20 @@ namespace NitroxClient.MonoBehaviours
 
         public static void SubnauticaLoadingStarted()
         {
+            Log.Info($"SubnauticaLoadingStarted invoked. Scene: {SceneManager.GetActiveScene().name}, Subscribers: {OnBeforeMultiplayerStart?.GetInvocationList().Length ?? 0}");
             OnBeforeMultiplayerStart?.Invoke();
+            Log.Info("SubnauticaLoadingStarted subscribers completed");
         }
 
         public static void SubnauticaLoadingCompleted()
         {
+            bool connected = Main && Main.client?.IsConnected == true;
+            Log.Info($"SubnauticaLoadingCompleted invoked. Scene: {SceneManager.GetActiveScene().name}, Active: {Active}, Connected: {connected}");
             if (Active)
             {
                 Main.InitialSyncCompleted = false;
                 Main.StartCoroutine(LoadAsync());
+                Log.Info("Started Nitrox post-world-load coroutine");
             }
             else
             {
@@ -108,6 +138,7 @@ namespace NitroxClient.MonoBehaviours
 
         public static IEnumerator LoadAsync()
         {
+            Log.Info("Waiting for LargeWorldStreamer to settle");
             WaitScreen.ManualWaitItem worldSettleItem = WaitScreen.Add(Language.main.Get("Nitrox_WorldSettling"));
 
             yield return new WaitUntil(() => LargeWorldStreamer.main != null &&
@@ -115,15 +146,18 @@ namespace NitroxClient.MonoBehaviours
                                              LargeWorldStreamer.main.IsReady() &&
                                              LargeWorldStreamer.main.IsWorldSettled());
 
+            Log.Info("LargeWorldStreamer settled; starting multiplayer session");
             WaitScreen.Remove(worldSettleItem);
 
             WaitScreen.ManualWaitItem joiningItem = WaitScreen.Add(Language.main.Get("Nitrox_JoiningSession"));
             yield return Main.StartCoroutine(Main.StartSession());
+            Log.Info("Multiplayer session start coroutine completed; waiting for initial sync");
             WaitScreen.Remove(joiningItem);
 
             WaitScreen.ManualWaitItem waitingItem = WaitScreen.Add(Language.main.Get("Nitrox_Waiting"));
             Log.InGame(Language.main.Get("Nitrox_Waiting"));
             yield return new WaitUntil(() => Main.InitialSyncCompleted);
+            Log.Info("Initial sync completed; finishing multiplayer load");
             WaitScreen.Remove(waitingItem);
 
             SetLoadingComplete();
@@ -152,9 +186,13 @@ namespace NitroxClient.MonoBehaviours
 
         public IEnumerator StartSession()
         {
+            Log.Info("Initializing local player state before joining session");
             yield return StartCoroutine(InitializeLocalPlayerState());
+            Log.Info("Local player state initialized; sending join-session packet");
             multiplayerSession.JoinSession();
+            Log.Info($"Join-session packet sent. Stage: {multiplayerSession.CurrentState.CurrentStage}");
             InitMonoBehaviours();
+            Log.Info("Multiplayer gameplay behaviours initialized");
             Utils.SetContinueMode(true);
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 

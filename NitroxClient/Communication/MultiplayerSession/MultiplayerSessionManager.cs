@@ -101,8 +101,10 @@ namespace NitroxClient.Communication.MultiplayerSession
 
         public void ProcessReservationResponsePacket(MultiplayerSessionReservation reservation)
         {
+            Log.Info($"Received reservation response. State: {reservation.ReservationState}, Session: {reservation.SessionId}, Current stage: {CurrentState.CurrentStage}");
             Reservation = reservation;
             CurrentState.NegotiateReservationAsync(this);
+            Log.Info($"Reservation response processed. New stage: {CurrentState.CurrentStage}");
         }
 
         public void JoinSession()

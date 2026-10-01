@@ -69,7 +69,7 @@ public static class JoinServerBackend
                 break;
 
             case MultiplayerSessionConnectionStage.SESSION_RESERVED:
-                Log.Info("Launching game");
+                Log.Info($"Launching game after reservation. Connected: {multiplayerSession.Client.IsConnected}, Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
                 Log.InGame(Language.main.Get("Nitrox_LaunchGame"));
                 multiplayerSession.ConnectionStateChanged -= SessionConnectionStateChangedHandler;
                 preferencesManager.Save();
@@ -172,18 +172,24 @@ public static class JoinServerBackend
 
     public static void StartGame()
     {
+        Log.Info($"Starting Subnautica multiplayer world load. Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}, Game version: {Application.version}");
 #pragma warning disable CS0618 // God Damn it UWE...
         Multiplayer.SubnauticaLoadingStarted();
         IEnumerator startNewGame = uGUI_MainMenu.main.StartNewGame(GameMode.Survival);
 #pragma warning restore CS0618 // God damn it UWE...
+        Log.Info($"Created StartNewGame coroutine: {startNewGame.GetType().FullName}");
         UWE.CoroutineHost.StartCoroutine(startNewGame);
+        Log.Info("Started StartNewGame coroutine");
         TopRightWatermarkText.Initialize();
+        Log.Info("Initialized multiplayer watermark after starting world load");
     }
 
     public static void StopMultiplayerClient()
     {
+        Log.Warn($"Stopping multiplayer client. Client object: {multiplayerClient}, Multiplayer object: {Multiplayer.Main}, Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
         if (!multiplayerClient || !Multiplayer.Main)
         {
+            Log.Warn("Multiplayer client stop skipped because its client or Multiplayer object is missing");
             return;
         }
 
