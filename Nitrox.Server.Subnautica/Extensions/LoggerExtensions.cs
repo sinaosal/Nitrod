@@ -59,8 +59,8 @@ internal static partial class LoggerExtensions
         logger.ZLog(LogLevel.Error, exception, ref zLogger, context, memberName, filePath, lineNumber);
     }
 
-    [ZLoggerMessage(Level = LogLevel.Information, Message = "Starting Nitrox server {ReleasePhase} v{Version} for {GameName}")]
-    public static partial void LogServerStarting(this ILogger logger, string releasePhase, Version version, string gameName);
+    [ZLoggerMessage(Level = LogLevel.Information, Message = "Starting Nitrod server {Version} for {GameName}")]
+    public static partial void LogServerStarting(this ILogger logger, string version, string gameName);
 
     [ZLoggerMessage(Level = LogLevel.Information, Message = "Using game files from {Path}")]
     public static partial void LogGamePath(this ILogger logger, string path);

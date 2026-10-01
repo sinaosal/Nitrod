@@ -78,7 +78,7 @@ internal class App : Application
     {
         CultureManager.ConfigureCultureInfo();
         Log.Setup();
-        Log.Info($@"Starting Nitrox Launcher V{NitroxEnvironment.Version}+{NitroxEnvironment.GitHash} with args ""{string.Join(" ", NitroxEnvironment.CommandLineArgs)}"" built on {NitroxEnvironment.BuildDate:F}");
+                Log.Info($@"Starting Nitrod Launcher {NitroxEnvironment.DisplayVersion}+{NitroxEnvironment.GitHash} with args ""{string.Join(" ", NitroxEnvironment.CommandLineArgs)}"" built on {NitroxEnvironment.BuildDate:F}");
 
         // Handle command line arguments.
         ConsoleApp.ConsoleAppBuilder cliParser = ConsoleApp.Create();
@@ -90,7 +90,7 @@ internal class App : Application
 
             if (isCrashReport && CrashReporter.GetLastReport() is {} crashLog)
             {
-                StartupWindowFactory = () => new CrashWindow { DataContext = new CrashWindowViewModel { Title = $"Nitrox {NitroxEnvironment.Version} - Crash Report", Message = crashLog } };
+                StartupWindowFactory = () => new CrashWindow { DataContext = new CrashWindowViewModel { Title = $"Nitrod {NitroxEnvironment.DisplayVersion} - Crash Report", Message = crashLog } };
             }
         });
         cliParser.Add("instantlaunch", ([SaveName] string save, [MinLength(1)] params string[] players) =>

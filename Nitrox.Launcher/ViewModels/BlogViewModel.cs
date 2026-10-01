@@ -53,12 +53,12 @@ internal sealed partial class BlogViewModel : RoutableViewModelBase
                 {
                     if (!cancellationToken.IsCancellationRequested)
                     {
-                        LauncherNotifier.Error("Failed to fetch Nitrox blogs");
+                        LauncherNotifier.Error("Failed to fetch Nitrod blogs");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error while trying to display nitrox blogs");
+                    Log.Error(ex, "Error while trying to display Nitrod blogs");
                 }
             });
         }

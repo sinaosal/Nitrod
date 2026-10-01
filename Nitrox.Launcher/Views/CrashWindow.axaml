@@ -68,7 +68,7 @@
                         Content="Copy to clipboard"
                         HotKey="Ctrl+Shift+C" />
                     <Button Command="{Binding ReportCommand}" Content="Report on GitHub" />
-                    <Button Command="{Binding RestartCommand}" Content="Restart Nitrox" />
+                    <Button Command="{Binding RestartCommand}" Content="Restart Nitrod" />
                 </StackPanel>
             </Border>
         </Grid>

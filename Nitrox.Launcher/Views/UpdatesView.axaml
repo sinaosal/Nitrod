@@ -30,7 +30,7 @@
                     <MultiBinding StringFormat="{}{0}&#x0a;&#x0a;Your version: {1}&#x0a;Official version: {2}">
                         <Binding>
                             <Binding.Source>
-                                <x:String>It looks like you aren't using an official version of Nitrox. If you are not a developer, please download the official version to ensure that you have the best experience.</x:String>
+                                <x:String>It looks like you aren't using an official version of Nitrod. If you are not a developer, please download the official version to ensure that you have the best experience.</x:String>
                             </Binding.Source>
                         </Binding>
                         <Binding Path="Version" FallbackValue="." />
@@ -42,7 +42,7 @@
 
         <Style Selector=".official">
             <Style Selector="^ controls|RecolorImage.updateIcon">
-                <Setter Property="Source" Value="/Assets/Images/nitrox-icon.ico" />
+                <Setter Property="Source" Value="/Assets/Images/nitrod-icon.ico" />
                 <Setter Property="ToolTip.Tip" Value="You are the best captain on the planet, I'm not even squiddin'" />
             </Style>
         </Style>
@@ -56,7 +56,7 @@
                     <MultiBinding StringFormat="{}{0} {1}&#x0a;&#x0a;{2}">
                         <Binding>
                             <Binding.Source>
-                                <x:String>You are already using the latest version of Nitrox</x:String>
+                                <x:String>You are already using the latest version of Nitrod</x:String>
                             </Binding.Source>
                         </Binding>
                         <Binding Path="Version" FallbackValue="." />
@@ -72,11 +72,11 @@
 
         <Style Selector=".official.newUpdate">
             <Style Selector="^ TextBlock.updateHeader">
-                <Setter Property="Text" Value="New Nitrox Update Available" />
+                <Setter Property="Text" Value="New Nitrod Update Available" />
             </Style>
             <Style Selector="^ TextBlock.updateDescription">
                 <Setter Property="Text"
-                        Value="Time for an update! A new version of Nitrox is now available to download. Back up your content and get the latest version to start using all the latest features and improvements." />
+                        Value="Time for an update! A new version of Nitrod is now available to download. Back up your content and get the latest version to start using all the latest features and improvements." />
             </Style>
         </Style>
     </UserControl.Styles>
@@ -159,7 +159,7 @@
                                             <Setter Property="ToolTip.Tip">Download and install the latest version</Setter>
                                         </Style>
                                         <Style Selector="^:disabled">
-                                            <Setter Property="ToolTip.Tip">Please close any servers that are online before updating Nitrox!</Setter>
+                                            <Setter Property="ToolTip.Tip">Please close any servers that are online before updating Nitrod!</Setter>
                                         </Style>
                                     </Style>
                                 </Button.Styles>

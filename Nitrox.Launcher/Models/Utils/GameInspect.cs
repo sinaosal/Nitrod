@@ -31,7 +31,7 @@ internal static class GameInspect
                     {
                         model.Title = "Outdated Game Detected";
                         model.Description =
-                            $"Nitrox does not support the older {GameInfo.Subnautica.FullName} game version of {gameVersion}. Please update your game to the latest version.{Environment.NewLine}{Environment.NewLine}Minimum game version: {NitroxEnvironment.GameMinimumVersion}{Environment.NewLine}Version file location:{Environment.NewLine}{gameVersionFile}{Environment.NewLine}";
+                            $"Nitrod does not support the older {GameInfo.Subnautica.FullName} game version of {gameVersion}. Please update your game to the latest version.{Environment.NewLine}{Environment.NewLine}Minimum game version: {NitroxEnvironment.GameMinimumVersion}{Environment.NewLine}Version file location:{Environment.NewLine}{gameVersionFile}{Environment.NewLine}";
                         model.ButtonOptions = ButtonOptions.Ok;
                     });
                 }
@@ -79,7 +79,7 @@ internal static class GameInspect
         if (modDllCount > 0)
         {
             Log.Warn($"BepInEx plugins detected: {modDllCount}");
-            LauncherNotifier.Warning($"BepInEx mod(s) were detected ({modDllCount}). Nitrox multiplayer does not support mods and they may cause instability.");
+            LauncherNotifier.Warning($"BepInEx mod(s) were detected ({modDllCount}). Nitrod multiplayer does not support mods and they may cause instability.");
         }
 
         static IEnumerable<string> GetDllPaths(string path)

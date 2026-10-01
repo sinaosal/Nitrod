@@ -289,7 +289,7 @@ internal sealed partial class ServerEntry : ObservableObject
         }
         if (Process?.IsRunning ?? false)
         {
-            throw new DuplicateSingularApplicationException("Nitrox Server");
+            throw new DuplicateSingularApplicationException("Nitrod Server");
         }
 
         // Start server and add notify when server closed.

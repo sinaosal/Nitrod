@@ -103,7 +103,7 @@ internal partial class MainWindowViewModel : ViewModelBase, IRoutingScreen
             {
                 // Set debug default options here.
                 keyValueStore.SetIsMultipleGameInstancesAllowed(true);
-                LauncherNotifier.Info("You're now using Nitrox DEV build");
+                LauncherNotifier.Info("You're now using a Nitrod DEV build");
             }
 
             // Only on Linux or macOS we allow changing save paths via XDG spec.
@@ -139,6 +139,10 @@ internal partial class MainWindowViewModel : ViewModelBase, IRoutingScreen
                     LauncherNotifier.Warning("Launcher may not be connected to internet");
                 }
                 UpdateAvailableOrUnofficial = await updatesViewModel.IsNitroxUpdateAvailableAsync();
+                if (updatesViewModel.NewUpdateAvailable)
+                {
+                    await Dispatcher.UIThread.InvokeAsync(async () => await updatesViewModel.PromptForAvailableUpdateAsync());
+                }
             });
 
             _ = this.ShowAsync(launchGameViewModel).ContinueWithHandleError(ex => LauncherNotifier.Error(ex.Message));

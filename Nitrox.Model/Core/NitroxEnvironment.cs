@@ -17,18 +17,15 @@ public static class NitroxEnvironment
     private static string? appName;
     private static bool? isWine;
     private static Assembly ExecutingAssembly => executingAssembly ??= Assembly.GetExecutingAssembly();
-    public static string ReleasePhase => IsReleaseMode ? "Alpha" : "InDev";
+    public static string ReleasePhase => "dev";
     public static Version Version => ExecutingAssembly.GetName().Version ?? new Version(1, 0);
+    public static string DisplayVersion => $"{Version.Major}.{Version.Minor}.{Version.Build}-dev";
 
     public static string VersionInfo
     {
         get
         {
-            if (IsReleaseMode)
-            {
-                return $"{ReleasePhase} V{Version} {GitShortHash}";
-            }
-            return $"{ReleasePhase} {GitShortHash}";
+            return $"{DisplayVersion} {GitShortHash}";
         }
     }
 
@@ -140,7 +137,7 @@ public static class NitroxEnvironment
         }
     }
 
-    public static string AppName => appName ??= (Assembly.GetEntryAssembly()?.GetName().Name ?? Assembly.GetCallingAssembly().GetName().Name)?.Replace(".", " ") ?? "Nitrox Program";
+    public static string AppName => appName ??= (Assembly.GetEntryAssembly()?.GetName().Name ?? Assembly.GetCallingAssembly().GetName().Name)?.Replace("Nitrox", "Nitrod").Replace(".", " ") ?? "Nitrod Program";
 
     /// <summary>
     ///     Returns true if executing in a Wine environment.

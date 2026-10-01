@@ -15,7 +15,7 @@ namespace Nitrox.Server.Subnautica.Services;
 /// </remarks>
 internal class PortForwardService(IOptionsMonitor<SubnauticaServerOptions> optionsProvider, ILogger<PortForwardService> logger) : BackgroundService
 {
-    private readonly string portMappingDescription = $"Nitrox server with process id {Environment.ProcessId}";
+    private readonly string portMappingDescription = $"Nitrod server with process id {Environment.ProcessId}";
     private readonly ILogger<PortForwardService> logger = logger;
     private readonly ConcurrentDictionary<ushort, bool> openedPorts = [];
     private readonly IOptionsMonitor<SubnauticaServerOptions> optionsProvider = optionsProvider;

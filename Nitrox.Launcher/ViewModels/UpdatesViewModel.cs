@@ -59,9 +59,10 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
         try
         {
             Version currentVersion = NitroxEnvironment.Version;
-            Version latestVersion = (await nitroxWebsiteApi.GetNitroxLatestVersionAsync())?.Version ?? new Version(0, 0);
+            NitroxWebsiteApiService.NitroxRelease? latestRelease = await nitroxWebsiteApi.GetNitroxLatestVersionAsync();
+            Version latestVersion = latestRelease?.Version ?? new Version(0, 0);
 
-            NewUpdateAvailable = latestVersion > currentVersion;
+            NewUpdateAvailable = latestVersion > currentVersion && latestRelease?.CurrentPlatformInfo != null;
             if (NewUpdateAvailable)
             {
                 string versionMessage = $"A new version of the mod ({latestVersion}) is available.";
@@ -97,12 +98,12 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    LauncherNotifier.Error("Failed to fetch Nitrox changelogs");
+                    LauncherNotifier.Error("Failed to fetch Nitrod changelogs");
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error while trying to display Nitrox changelogs");
+                Log.Error(ex, "Error while trying to display Nitrod changelogs");
             }
         });
     }
@@ -198,10 +199,10 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
         }
         DialogBoxViewModel confirmResult = await dialogService.ShowAsync<DialogBoxViewModel>(model =>
         {
-            model.Title = $"Download and install Nitrox {latestRelease.Version} ({downloadInfo.FileSizeMegaBytes:F1} MB)?";
+            model.Title = $"Download and install Nitrod {latestRelease.Version} ({downloadInfo.FileSizeMegaBytes:F1} MB)?";
             if (NitroxEnvironment.IsReleaseMode)
             {
-                model.Description = "The will overwrite your current Nitrox installation and restart Nitrox after the update is complete.\nPlease check if this update is compatible with your current save file before continuing.";
+                model.Description = "This will overwrite your current Nitrod installation and restart Nitrod after the update is complete.\nPlease check if this update is compatible with your current save file before continuing.";
             }
             else
             {
@@ -262,7 +263,7 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
 
                 // Download the update
                 DownloadStatus = "Downloading...";
-                using (HttpFileService.FileDownloader? downloader = await nitroxWebsiteApi.GetLatestNitroxAsync(downloadCts.Token))
+                using (HttpFileService.FileDownloader? downloader = await nitroxWebsiteApi.GetLatestNitroxAsync(downloadInfo.DownloadUrl, downloadCts.Token))
                 {
                     if (downloader == null)
                     {
@@ -279,8 +280,17 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
                     }
                 }
 
-                // Verify MD5 hash if provided
-                if (!string.IsNullOrEmpty(downloadInfo.Md5Hash))
+                if (!string.IsNullOrEmpty(downloadInfo.Sha256Hash))
+                {
+                    DownloadStatus = "Verifying download...";
+                    DownloadProgress = 100;
+                    string downloadedHash = Convert.ToHexStringLower(await Hashing.GetSha256(zipPath));
+                    if (!string.Equals(downloadedHash, downloadInfo.Sha256Hash, StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new Exception($"Download verification failed. Expected SHA-256: {downloadInfo.Sha256Hash}, got: {downloadedHash}");
+                    }
+                }
+                else if (!string.IsNullOrEmpty(downloadInfo.Md5Hash))
                 {
                     DownloadStatus = "Verifying download...";
                     DownloadProgress = 100;
@@ -335,6 +345,14 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
     }
 
     private bool CanDownloadUpdate() => !CanCancelDownload() && serverService.Servers.All(s => !s.IsOnline);
+
+    internal async Task PromptForAvailableUpdateAsync()
+    {
+        if (NewUpdateAvailable && CanDownloadUpdate())
+        {
+            await DownloadUpdate();
+        }
+    }
 
     [RelayCommand(CanExecute = nameof(CanCancelDownload))]
     private void CancelDownload()

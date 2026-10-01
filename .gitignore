@@ -17,6 +17,7 @@ Info.plist
 
 # Local release archives
 /NitroxM v*.zip
+/Nitrod v*.zip
 
 # User-specific files
 *.rsuser

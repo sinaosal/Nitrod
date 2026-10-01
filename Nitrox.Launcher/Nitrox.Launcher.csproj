@@ -8,13 +8,15 @@
         <AvaloniaNameGeneratorIsEnabled>true</AvaloniaNameGeneratorIsEnabled>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-        <ApplicationIcon>Assets\Images\nitrox-icon.ico</ApplicationIcon>
+        <ApplicationIcon>Assets\Images\nitrod-icon.ico</ApplicationIcon>
+        <Product>Nitrod</Product>
+        <AssemblyTitle>Nitrod Launcher</AssemblyTitle>
         <PublishTrimmed>false</PublishTrimmed>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
 
     <PropertyGroup>
-        <AppBundleName>Nitrox.app</AppBundleName>
+        <AppBundleName>Nitrod.app</AppBundleName>
     </PropertyGroup>
 
     <ItemGroup>

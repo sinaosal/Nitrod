@@ -47,7 +47,7 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
         AssetHelper.GetAssetFromStream("/Assets/Images/gallery/image-4.png", static stream => new Bitmap(stream))
     ];
 
-    public string Version => $"{NitroxEnvironment.ReleasePhase} {NitroxEnvironment.Version}";
+    public string Version => NitroxEnvironment.DisplayVersion;
 
     internal override async Task ViewContentLoadAsync(CancellationToken cancellationToken = default)
     {
@@ -113,7 +113,7 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
                 }
                 if (PirateDetection.HasTriggered)
                 {
-                    LauncherNotifier.Error("Aarrr! Nitrox has walked the plank :(");
+                    LauncherNotifier.Error("Aarrr! Nitrod has walked the plank :(");
                     return false;
                 }
                 NitroxEntryPatch.TraceStep("StartMultiplayerAsync: before WarnIfGameProcessExists");
@@ -160,7 +160,7 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
                     LauncherNotifier.Error(
                         patchExitCode is 1
                             ? "Failed to patch Subnautica for multiplayer. Check nitrox-patch-trace.log for details."
-                            : $"Nitrox crashed while patching Subnautica (exit code {patchExitCode}). Your Subnautica installation may be modified in a way Nitrox cannot support."
+                            : $"Nitrod crashed while patching Subnautica (exit code {patchExitCode}). Your Subnautica installation may be modified in a way Nitrod cannot support."
                     );
                     return false;
                 }

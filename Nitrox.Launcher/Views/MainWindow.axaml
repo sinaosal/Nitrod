@@ -23,9 +23,9 @@
     xmlns:designer="clr-namespace:Nitrox.Launcher.ViewModels.Designer"
     xmlns:core="clr-namespace:Nitrox.Model.Core;assembly=Nitrox.Model">
     <Window.Title>
-        <MultiBinding StringFormat="{}{0} - V{1} ({2})">
+        <MultiBinding StringFormat="{}{0} - {1} ({2})">
             <Binding Source="{x:Static core:NitroxEnvironment.AppName}" />
-            <Binding Source="{x:Static core:NitroxEnvironment.Version}" />
+            <Binding Source="{x:Static core:NitroxEnvironment.DisplayVersion}" />
             <Binding Source="{x:Static core:NitroxEnvironment.GitShortHash}" />
         </MultiBinding>
     </Window.Title>
@@ -86,7 +86,7 @@
                                 HorizontalAlignment="Left"
                                 Margin="49.25,13.5,0,0"
                                 IsVisible="False"
-                                ToolTip.Tip="New Nitrox update available" />
+                                ToolTip.Tip="New Nitrod update available" />
                             <!-- Unread notifications badge -->
                             <Border
                                 Height="10"
@@ -203,7 +203,7 @@
             <!--  Navigation (left side)  -->
             <Border Classes="nav" Grid.Column="0">
                 <Grid RowDefinitions="80,*">
-                    <TextBlock Classes="header">NITROX</TextBlock>
+                    <TextBlock Classes="header">NITROD</TextBlock>
                     <Panel Grid.Row="1">
                         <StackPanel Classes="nav">
                             <TextBlock Classes="subheader">PLAY</TextBlock>
@@ -244,7 +244,7 @@
                                 Command="{Binding OpenCommunityViewCommand}"
                                 Content="Community"
                                 Tag="/Assets/Images/tabs-icons/community.png"
-                                ToolTip.Tip="Join Nitrox community">
+                                ToolTip.Tip="Join the Nitrod community">
                                 <RadioButton.IsChecked>
                                     <Binding Path="ActiveViewModel" Converter="{converters:IsTypeConverter}" Mode="OneWay">
                                         <Binding.ConverterParameter>
@@ -280,7 +280,7 @@
                                 Command="{Binding OpenUpdatesViewCommand}"
                                 Content="Updates"
                                 Tag="/Assets/Images/tabs-icons/update.png"
-                                ToolTip.Tip="Check latest updates from Nitrox">
+                                ToolTip.Tip="Check the latest Nitrod updates">
                                 <RadioButton.IsChecked>
                                     <Binding Path="ActiveViewModel" Converter="{converters:IsTypeConverter}" Mode="OneWay">
                                         <Binding.ConverterParameter>
@@ -311,7 +311,7 @@
                                 Command="{Binding OpenOptionsViewCommand}"
                                 Content="Options"
                                 Tag="/Assets/Images/tabs-icons/options.png"
-                                ToolTip.Tip="Configure your Nitrox setup">
+                                ToolTip.Tip="Configure your Nitrod setup">
                                 <RadioButton.IsChecked>
                                     <Binding Path="ActiveViewModel" Converter="{converters:IsTypeConverter}" Mode="OneWay">
                                         <Binding.ConverterParameter>

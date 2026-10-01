@@ -13,7 +13,7 @@ internal static class CrashReporter
 
     public static void ReportAndExit(Exception ex)
     {
-        Log.Error(ex, "!!!Nitrox Launcher Crash!!!");
+        Log.Error(ex, "!!!Nitrod Launcher Crash!!!");
 
         try
         {

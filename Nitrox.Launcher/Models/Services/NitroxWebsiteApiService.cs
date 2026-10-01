@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace Nitrox.Launcher.Models.Services;
 [HttpService]
 internal sealed class NitroxWebsiteApiService
 {
+    private const string RELEASES_PATH = "releases?per_page=20";
     private readonly HttpClient httpClient;
     private readonly HttpFileService httpFileService;
 
@@ -22,49 +24,119 @@ internal sealed class NitroxWebsiteApiService
     {
         this.httpClient = httpClient;
         this.httpFileService = httpFileService;
-        httpClient.BaseAddress = new Uri("https://nitrox.rux.gg/api/");
+        httpClient.BaseAddress = new Uri("https://api.github.com/repos/sinaosal/Nitrox-Modification/");
+        httpClient.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+        httpClient.DefaultRequestHeaders.CacheControl = null;
     }
 
     public async Task<NitroxChangelog[]?> GetChangeLogsAsync(CancellationToken cancellationToken = default)
     {
-        ChangeLog[] changeLogs = await httpClient.GetFromJsonAsync<ChangeLog[]>("changelog/releases", cancellationToken);
-        NitroxChangelog[] result = new NitroxChangelog[changeLogs.Length];
-        StringBuilder buffer = new();
-        for (int i = 0; i < changeLogs.Length; i++)
-        {
-            result[i] = changeLogs[i].FromDtoToLauncher(buffer);
-        }
-        return result;
+        GitHubRelease[] releases = await GetReleasesAsync(cancellationToken);
+        return releases
+            .Where(static release => !release.Draft && release.ParsedVersion != null)
+            .Select(static release => new NitroxChangelog(release.TagName, release.PublishedAt.DateTime, release.Body ?? "No release notes provided."))
+            .ToArray();
     }
 
-    public async Task<NitroxRelease?> GetNitroxLatestVersionAsync() => await httpClient.GetFromJsonAsync<NitroxRelease>("version/latest");
-
-    /// <summary>
-    ///     Gets the latest Nitrox for the platform of the current machine.
-    /// </summary>
-    public async Task<HttpFileService.FileDownloader?> GetLatestNitroxAsync(CancellationToken cancellationToken)
+    public async Task<NitroxRelease?> GetNitroxLatestVersionAsync(CancellationToken cancellationToken = default)
     {
-        if (await GetNitroxLatestVersionAsync() is not { CurrentPlatformInfo: { } downloadInfo })
+        GitHubRelease? release = await GetLatestReleaseAsync(cancellationToken);
+        if (release?.ParsedVersion is not { } version)
         {
             return null;
         }
 
-        return await httpFileService.GetFileAsync(downloadInfo.DownloadUrl, cancellationToken);
+        Dictionary<string, PlatformInfo> platforms = [];
+        if (release.CurrentPlatformAsset is { } asset)
+        {
+            platforms[NitroxEnvironment.PlatformName] = new PlatformInfo
+            {
+                Architectures = new Dictionary<string, ArchitectureInfo>
+                {
+                    [NitroxEnvironment.ArchitectureName] = new ArchitectureInfo
+                    {
+                        DownloadUrl = asset.DownloadUrl,
+                        FileSize = asset.Size.ToString(CultureInfo.InvariantCulture),
+                        Sha256Hash = asset.Sha256Hash
+                    }
+                }
+            };
+        }
+
+        return new NitroxRelease { Version = version, Platforms = platforms };
     }
 
-    public sealed record ChangeLog
+    /// <summary>
+    ///     Gets the latest Nitrox for the platform of the current machine.
+    /// </summary>
+    public Task<HttpFileService.FileDownloader> GetLatestNitroxAsync(string downloadUrl, CancellationToken cancellationToken) =>
+        httpFileService.GetFileAsync(downloadUrl, cancellationToken);
+
+    private async Task<GitHubRelease[]> GetReleasesAsync(CancellationToken cancellationToken) =>
+        await httpClient.GetFromJsonAsync<GitHubRelease[]>(RELEASES_PATH, cancellationToken) ?? [];
+
+    private async Task<GitHubRelease?> GetLatestReleaseAsync(CancellationToken cancellationToken)
     {
-        /// <summary>
-        ///     Release time of this change log.
-        /// </summary>
-        [JsonPropertyName("released")]
-        public required DateTimeOffset Released { get; init; }
+        GitHubRelease[] releases = await GetReleasesAsync(cancellationToken);
+        return releases
+            .Where(static release => !release.Draft && release.ParsedVersion != null)
+            .OrderByDescending(static release => release.PublishedAt)
+            .FirstOrDefault();
+    }
 
-        [JsonPropertyName("patchnotes")]
-        public required string[] PatchNotes { get; init; }
+    public sealed record GitHubRelease
+    {
+        [JsonPropertyName("tag_name")]
+        public required string TagName { get; init; }
 
-        [JsonPropertyName("version")]
-        public required string Version { get; init; }
+        [JsonPropertyName("published_at")]
+        public DateTimeOffset PublishedAt { get; init; }
+
+        [JsonPropertyName("draft")]
+        public bool Draft { get; init; }
+
+        [JsonPropertyName("body")]
+        public string? Body { get; init; }
+
+        [JsonPropertyName("assets")]
+        public GitHubReleaseAsset[]? Assets { get; init; }
+
+        [JsonIgnore]
+        public Version? ParsedVersion => ParseReleaseVersion(TagName);
+
+        [JsonIgnore]
+        public GitHubReleaseAsset? CurrentPlatformAsset => OperatingSystem.IsWindows()
+            ? Assets?.FirstOrDefault(static asset => asset.Name.EndsWith("-Win64.zip", StringComparison.OrdinalIgnoreCase))
+            : null;
+
+        private static Version? ParseReleaseVersion(string tagName)
+        {
+            string numericVersion = tagName.TrimStart('v', 'V').Split('-', '+')[0];
+            if (!Version.TryParse(numericVersion, out Version? parsedVersion) || parsedVersion.Build < 0)
+            {
+                return null;
+            }
+
+            return new Version(parsedVersion.Major, parsedVersion.Minor, parsedVersion.Build, 0);
+        }
+    }
+
+    public sealed record GitHubReleaseAsset
+    {
+        [JsonPropertyName("name")]
+        public required string Name { get; init; }
+
+        [JsonPropertyName("browser_download_url")]
+        public required string DownloadUrl { get; init; }
+
+        [JsonPropertyName("size")]
+        public long Size { get; init; }
+
+        [JsonPropertyName("digest")]
+        public string? Digest { get; init; }
+
+        [JsonIgnore]
+        public string? Sha256Hash => Digest?.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) == true ? Digest[7..] : null;
     }
 
     public sealed record NitroxRelease
@@ -113,8 +185,9 @@ internal sealed class NitroxWebsiteApiService
         [JsonPropertyName("url")]
         public required string DownloadUrl { get; init; }
 
-        [JsonPropertyName("md5")]
-        public required string Md5Hash { get; init; }
+        public string? Md5Hash { get; init; }
+
+        public string? Sha256Hash { get; init; }
 
         [JsonPropertyName("filesize")]
         public required string FileSize { get; init; }

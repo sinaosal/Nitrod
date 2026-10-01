@@ -46,7 +46,7 @@ internal sealed class DefaultServerPacketProcessor(ILogger<DefaultServerPacketPr
         }
         if (defaultPacketProcessorBlacklist.Contains(packetType))
         {
-            logger.ZLogErrorOnce($"Player {context.Sender.Name} #{context.Sender.SessionId} sent a packet which is blacklisted by the server. It's likely that the said player is using a modified version of Nitrox and action could be taken accordingly.");
+            logger.ZLogErrorOnce($"Player {context.Sender.Name} #{context.Sender.SessionId} sent a packet which is blacklisted by the server. It's likely that the said player is using a modified version of Nitrod and action could be taken accordingly.");
             return;
         }
 

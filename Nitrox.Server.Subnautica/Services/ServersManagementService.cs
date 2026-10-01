@@ -224,7 +224,7 @@ internal sealed class ServersManagementService(PlayerManager playerManager, IPac
         }
         catch (Exception)
         {
-            logger.ZLogWarningOnce($"Unable to get gRPC connection info from Nitrox Launcher, it might not be running. Retrying...");
+            logger.ZLogWarningOnce($"Unable to get gRPC connection info from Nitrod Launcher, it might not be running. Retrying...");
         }
         return new ConnectionInfo();
     }

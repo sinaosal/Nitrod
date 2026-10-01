@@ -104,8 +104,8 @@ internal partial class OptionsViewModel(IKeyValueStore keyValueStore, StorageSer
             {
                 LauncherNotifier.Error(
                     RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                        ? "Restart Nitrox Launcher as admin to allow Nitrox to change permissions as needed. This is only needed once."
-                        : $"Unable to set permissions on the directories at '{path}'. Please grant read and write permissions so Nitrox can work properly."
+                        ? "Restart Nitrod Launcher as admin to allow Nitrod to change permissions as needed. This is only needed once."
+                        : $"Unable to set permissions on the directories at '{path}'. Please grant read and write permissions so Nitrod can work properly."
                 );
 
                 return;

@@ -36,7 +36,7 @@
                     Grid.Column="0"
                     Margin="0,0,20,0"
                     FontSize="14"
-                    Text="Start your Subnautica adventure in multiplayer mode together with your friends, powered by the Nitrox mod: An open-source modification for the game Subnautica. The project is maintained by the community with regular support and updates from its contributors." />
+                    Text="Nitrod is a fork of Nitrox, an open-source Subnautica multiplayer modification. Main contributors to this fork: Sinaosal (code) and Prosims (logo)." />
                 <!--  Play buttons - Negative offset to add some overlap with the background image  -->
                 <StackPanel Grid.Column="1" Margin="0,-110,0,0">
                     <Border ClipToBounds="True" CornerRadius="10">
@@ -57,7 +57,7 @@
                                                     <Setter Property="FontSize" Value="10" />
                                                 </Style>
                                             </StackPanel.Styles>
-                                            <TextBlock Foreground="{DynamicResource BrandSubText}" Text="PLAY NITROX" />
+                                            <TextBlock Foreground="{DynamicResource BrandSubText}" Text="PLAY NITROD" />
                                             <TextBlock Text="{Binding Version, FallbackValue='PHASE x.x.x.x'}" />
                                         </StackPanel>
                                         <controls:RecolorImage
@@ -138,6 +138,8 @@
 
                     <TextBlock Text="AUTHOR" />
                     <controls:RichTextBlock>[Sunrunner](github.com/Sunrunner37)</controls:RichTextBlock>
+                    <TextBlock Text="NITROD FORK CONTRIBUTORS" />
+                    <controls:RichTextBlock>[Sinaosal](github.com/sinaosal) (code), [Prosims](github.com/Prosims) (logo)</controls:RichTextBlock>
                     <!--  Active contributors which have higher role than junior.  -->
                     <TextBlock Text="CONTRIBUTORS" />
                     <WrapPanel>

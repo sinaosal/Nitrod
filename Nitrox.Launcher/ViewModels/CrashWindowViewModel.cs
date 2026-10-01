@@ -38,7 +38,7 @@ internal partial class CrashWindowViewModel : ViewModelBase
             // ignored
         }
         // TODO: Fill in more issue details (is latest release or commit, last view, last clicked button, etc).
-        string issueTitle = $"Launcher v{NitroxEnvironment.Version} crashed with {errorTitle}";
+        string issueTitle = $"Launcher {NitroxEnvironment.DisplayVersion} crashed with {errorTitle}";
         string whatHappened = $"```\n{Message}\n```";
         string storeType = NitroxUser.GamePlatform?.Platform switch
         {

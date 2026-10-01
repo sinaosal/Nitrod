@@ -117,7 +117,7 @@
                         FontSize="20"
                         FontWeight="Bold"
                         Text="Subnautica Launch Arguments" />
-                    <TextBlock FontSize="12" Text="Allows you to override Nitrox default launch arguments" />
+                    <TextBlock FontSize="12" Text="Allows you to override Nitrod default launch arguments" />
                 </StackPanel>
                 <Border
                     Background="{DynamicResource BrandPanelBackground}"
@@ -211,7 +211,7 @@
 							<TextBlock Text="Light mode" />
 							<CheckBox Classes="switch"
 									  IsChecked="{Binding IsLightModeEnabled}"
-									  ToolTip.Tip="Enable this option to use the Nitrox launcher in light mode" />
+                                      ToolTip.Tip="Enable this option to use the Nitrod launcher in light mode" />
 						</StackPanel>
 					</Border>
 					<Border>
@@ -252,11 +252,11 @@
                 <TextBlock
                     FontSize="20"
                     FontWeight="Bold"
-                    Text="Nitrox Program Data Location" />
+                    Text="Nitrod Program Data Location" />
                 <TextBlock
                     FontSize="12"
                     HorizontalAlignment="Left"
-                    Text="This is the location where files used by Nitrox are stored, including your screenshots, saves and logs" />
+                    Text="This is the location where files used by Nitrod are stored, including your screenshots, saves and logs" />
 
                 <Button Classes="icon" Command="{Binding OpenFolderCommand}"
                         CommandParameter="{Binding ProgramDataPath}"

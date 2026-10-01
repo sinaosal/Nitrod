@@ -78,7 +78,7 @@ internal static class LoggingBuilderExtensions
                                const int LEFT_AND_RIGHT_PADDING = 4;
                                const int PADDING_SPACING = 1;
                                const char PADDING_CHAR = '=';
-                               string headerLine = $"{NitroxEnvironment.AppName} {NitroxEnvironment.Version} {NitroxEnvironment.GitHash}";
+                               string headerLine = $"{NitroxEnvironment.AppName} {NitroxEnvironment.DisplayVersion} {NitroxEnvironment.GitHash}";
                                headerLine = $"{new string(' ', PADDING_SPACING)}{headerLine}";
                                return $"""
 

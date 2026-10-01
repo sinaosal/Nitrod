@@ -3,7 +3,7 @@
         <!--  Default/Light theme  -->
         <ResourceDictionary x:Key="Default">
             <!--  Main colors  -->
-            <Color x:Key="BrandPrimary">#007BFF</Color>
+            <Color x:Key="BrandPrimary">#16843D</Color>
             <Color x:Key="BrandWhite">#FFFFFF</Color>
             <Color x:Key="BrandBlack">#000000</Color>
             <Color x:Key="BrandBorder">#D1D1D1</Color>
@@ -32,12 +32,12 @@
             <x:String x:Key="BrandSvgStyle">* { fill: #000; stroke: #000; }</x:String>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-            <Color x:Key="BrandWhite">#000000</Color>
+            <Color x:Key="BrandWhite">#07110A</Color>
             <Color x:Key="BrandBlack">#FFFFFF</Color>
             <Color x:Key="BrandBorder">#323232</Color>
-            <Color x:Key="BrandControlBackground">#1D1D1D</Color>
-            <Color x:Key="BrandCheckboxBackground">#333333</Color>
-            <Color x:Key="BrandPanelBackground">#151516</Color>
+            <Color x:Key="BrandControlBackground">#1B231D</Color>
+            <Color x:Key="BrandCheckboxBackground">#2B342D</Color>
+            <Color x:Key="BrandPanelBackground">#141B16</Color>
             <Color x:Key="BrandBorderBackground">#474747</Color>
             <Color x:Key="BrandCaret">#FFFFFF</Color>
             <Color x:Key="BrandFocusBorder">#40FFFFFF</Color>

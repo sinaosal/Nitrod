@@ -34,7 +34,7 @@ internal sealed class StatusService(
 
     public Task StartingAsync(CancellationToken cancellationToken)
     {
-        logger.LogServerStarting(NitroxEnvironment.ReleasePhase, NitroxEnvironment.Version, gameInfo.FullName);
+        logger.LogServerStarting(NitroxEnvironment.DisplayVersion, gameInfo.FullName);
         logger.LogGamePath(startOptions.Value.GamePath ?? "unknown");
         logger.LogSaveUsage(startOptions.Value.SaveName);
         return Task.CompletedTask;

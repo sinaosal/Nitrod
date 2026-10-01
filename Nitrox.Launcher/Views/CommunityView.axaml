@@ -94,7 +94,7 @@
                                 ToolTip.Tip="Follow on X" />
                         </Grid>
                         <TextBlock Text="X" />
-                        <TextBlock Text="Follow the Nitrox X account to always be up to date on latest developments, events, and releases." />
+                        <TextBlock Text="Follow the Nitrod X account to stay up to date on the latest developments, events, and releases." />
                     </StackPanel>
                 </Border>
                 <Border>
@@ -115,7 +115,7 @@
                                 ToolTip.Tip="Follow on Bluesky" />
                         </Grid>
                         <TextBlock Text="Bluesky" />
-                        <TextBlock Text="Follow the Nitrox Bluesky account to always be up to date on latest developments, events, and releases." />
+                        <TextBlock Text="Follow the Nitrod Bluesky account to stay up to date on the latest developments, events, and releases." />
                     </StackPanel>
                 </Border>
                 <Border>
@@ -124,7 +124,7 @@
                             <Button
                                 Classes="anycontent"
                                 Command="{Binding RedditLinkCommand}"
-                                ToolTip.Tip="Join Nitrox Subreddit">
+                                ToolTip.Tip="Join the Nitrod subreddit">
                                 <Border Background="#FF4500">
                                     <Svg Path="/Assets/Icons/brand/reddit.svg" />
                                 </Border>
@@ -133,10 +133,10 @@
                             <Button
                                 Command="{Binding RedditLinkCommand}"
                                 Content="Join Subreddit"
-                                ToolTip.Tip="Join Nitrox Subreddit" />
+                                ToolTip.Tip="Join the Nitrod subreddit" />
                         </Grid>
                         <TextBlock Text="Reddit" />
-                        <TextBlock Text="Join the Nitrox Subreddit to stay informed about latest releases and post your own Nitrox content." />
+                        <TextBlock Text="Join the Nitrod subreddit to follow releases and share your own Nitrod content." />
                     </StackPanel>
                 </Border>
                 <Border>
@@ -156,7 +156,7 @@
                                 ToolTip.Tip="Contribute on GitHub" />
                         </Grid>
                         <TextBlock Text="GitHub" />
-                        <TextBlock Text="Want to be part of the team? Contribute from code to translations to the Nitrox project on GitHub." />
+                        <TextBlock Text="Want to be part of the team? Contribute code or translations to the Nitrod project on GitHub." />
                     </StackPanel>
                 </Border>
             </controls:FittingWrapPanel>
