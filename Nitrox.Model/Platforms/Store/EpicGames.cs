@@ -1,14 +1,43 @@
-public bool OwnsGame(string gameDirectory)
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Nitrox.Model.Constants;
+using Nitrox.Model.Helper;
+using Nitrox.Model.Platforms.Discovery.Models;
+using Nitrox.Model.Platforms.OS.Shared;
+using Nitrox.Model.Platforms.Store.Interfaces;
+
+namespace Nitrox.Model.Platforms.Store;
+
+public sealed class EpicGames : IGamePlatform
 {
-    string path = Path.Combine(gameDirectory, ".egstore");
-    
-    try
+    public string Name => "Epic Games Store";
+    public Platform Platform => Platform.EPIC;
+
+    public bool OwnsGame(string gameDirectory)
     {
-        return Directory.EnumerateFiles(path, "*.manifest", SearchOption.TopDirectoryOnly).Any();
+        string path = Path.Combine(gameDirectory, ".egstore");
+
+        try
+        {
+            return Directory.EnumerateFiles(path, "*.manifest", SearchOption.TopDirectoryOnly).Any();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+            return false;
+        }
     }
-    catch (Exception ex)
+
+    public static async Task<ProcessEx> StartGameAsync(string pathToGameExe, string launchArguments)
     {
-        Log.Error(ex);
-        return false;
+        return await Task.FromResult(
+            ProcessEx.Start(
+                pathToGameExe,
+                [(NitroxUser.LAUNCHER_PATH_ENV_KEY, NitroxUser.LauncherPath), (NitroxConstants.HOST_HOME_ENV_VAR_NAME, NitroxDirectory.HomePath)],
+                Path.GetDirectoryName(pathToGameExe),
+                $"-EpicPortal -epicuserid=0 {launchArguments}")
+        );
     }
 }

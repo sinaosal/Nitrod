@@ -48,7 +48,6 @@ public class PatchesTranspilerTest
         [typeof(EntityCell_AwakeAsync_Patch), 2],
         [typeof(EntityCell_SleepAsync_Patch), 2],
         [typeof(ErrorMessage_OnLateUpdate_Patch), 0],
-        [typeof(EscapePod_Start_Patch), 43],
         [typeof(FireExtinguisherHolder_TakeTankAsync_Patch), 2],
         [typeof(FireExtinguisherHolder_TryStoreTank_Patch), 3],
         [typeof(Flare_Update_Patch), 0],
