@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nitrox.Launcher.Models.Attributes;
 using Nitrox.Launcher.Models.Design;
+using Nitrox.Launcher.Models.Utils;
 using Nitrox.Model.Core;
 
 namespace Nitrox.Launcher.Models.Services;
@@ -34,7 +35,7 @@ internal sealed class NitroxWebsiteApiService
         GitHubRelease[] releases = await GetReleasesAsync(cancellationToken);
         return releases
             .Where(static release => !release.Draft && release.ParsedVersion != null)
-            .Select(static release => new NitroxChangelog(release.TagName, release.PublishedAt.UtcDateTime, release.Body ?? "No release notes provided."))
+            .Select(static release => new NitroxChangelog(release.TagName, release.PublishedAt.UtcDateTime, MarkdownRichTextConverter.Convert(release.Body ?? "No release notes provided.")))
             .ToArray();
     }
 

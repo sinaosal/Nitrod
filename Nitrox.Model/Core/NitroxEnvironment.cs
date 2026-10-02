@@ -19,7 +19,7 @@ public static class NitroxEnvironment
     private static Assembly ExecutingAssembly => executingAssembly ??= Assembly.GetExecutingAssembly();
     public static string ReleasePhase => "dev";
     public static Version Version => ExecutingAssembly.GetName().Version ?? new Version(1, 0);
-    public static string DisplayVersion => $"{Version.Major}.{Version.Minor}.{Version.Build}-dev";
+    public static string DisplayVersion => ExecutingAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? Version.ToString();
 
     public static string VersionInfo
     {
