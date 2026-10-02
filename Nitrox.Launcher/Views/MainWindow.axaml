@@ -344,10 +344,8 @@
             <TransitioningContentControl
                 Classes="content"
                 Content="{Binding ActiveViewModel, TargetNullValue='No view set. You should not see this message.'}"
+                PageTransition="{Binding PageTransition}"
                 Grid.Column="1">
-                <TransitioningContentControl.PageTransition>
-                    <CrossFade Duration="0:0:1" />
-                </TransitioningContentControl.PageTransition>
                 <TransitioningContentControl.ContentTemplate>
                     <design:MultiDataTemplate UseCache="False">
                         <!--  Null view (which will be a string, see TargetNullValue)  -->

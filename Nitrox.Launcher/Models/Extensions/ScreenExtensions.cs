@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Animation;
 using Nitrox.Launcher.Models.Design;
 using Nitrox.Launcher.Models.Utils;
 using Nitrox.Launcher.ViewModels.Abstract;
@@ -54,6 +55,7 @@ internal static class ScreenExtensions
         try
         {
             ctsToken.ThrowIfCancellationRequested();
+            screen.PageTransition = new CrossFade(screen.ActiveViewModel is Uri ? TimeSpan.FromSeconds(1) : TimeSpan.FromMilliseconds(300));
             Stopwatch sw = Stopwatch.StartNew();
             bool loadingScreenIsVisible = screen.ActiveViewModel is Uri;
             Task contentLoadTask = routableViewModel.ViewContentLoadAsync(ctsToken);

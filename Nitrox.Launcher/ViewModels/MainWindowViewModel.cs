@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Styling;
@@ -38,6 +39,9 @@ internal partial class MainWindowViewModel : ViewModelBase, IRoutingScreen
 
     [ObservableProperty]
     public partial object? ActiveViewModel { get; set; }
+
+    [ObservableProperty]
+    public partial IPageTransition? PageTransition { get; set; }
 
     [ObservableProperty]
     public partial bool UpdateAvailableOrUnofficial { get; set; }
