@@ -34,7 +34,7 @@ internal sealed class NitroxWebsiteApiService
         GitHubRelease[] releases = await GetReleasesAsync(cancellationToken);
         return releases
             .Where(static release => !release.Draft && release.ParsedVersion != null)
-            .Select(static release => new NitroxChangelog(release.TagName, release.PublishedAt.DateTime, release.Body ?? "No release notes provided."))
+            .Select(static release => new NitroxChangelog(release.TagName, release.PublishedAt.UtcDateTime, release.Body ?? "No release notes provided."))
             .ToArray();
     }
 
