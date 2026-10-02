@@ -55,6 +55,7 @@ internal static class ScreenExtensions
         {
             ctsToken.ThrowIfCancellationRequested();
             Stopwatch sw = Stopwatch.StartNew();
+            bool loadingScreenIsVisible = screen.ActiveViewModel is Uri;
             Task contentLoadTask = routableViewModel.ViewContentLoadAsync(ctsToken);
             if (screen.ActiveViewModel != null)
             {
@@ -64,7 +65,11 @@ internal static class ScreenExtensions
                 {
                     ctsToken.ThrowIfCancellationRequested();
                     screen.ActiveViewModel = AssetHelper.GetFullAssetPath("/Assets/Icons/loading.svg");
-                    await Task.Delay((int)Math.Max(0, 500 - sw.Elapsed.TotalMilliseconds), ctsToken);
+                    loadingScreenIsVisible = true;
+                }
+                if (loadingScreenIsVisible)
+                {
+                    await Task.Delay((int)Math.Max(0, 1000 - sw.Elapsed.TotalMilliseconds), ctsToken);
                 }
             }
             await contentLoadTask;

@@ -54,7 +54,9 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
         await Task.Run(() =>
         {
             GamePlatform = NitroxUser.GamePlatform?.Platform ?? Platform.NONE;
-            PlatformToolTip = GamePlatform.GetAttribute<DescriptionAttribute>()?.Description ?? "";
+            PlatformToolTip = GamePlatform == Platform.NONE
+                ? "Subnautica (Standalone)"
+                : GamePlatform.GetAttribute<DescriptionAttribute>()?.Description ?? "";
             HandleInstantLaunchForDevelopment();
         }, cancellationToken);
     }

@@ -139,7 +139,7 @@
                     <TextBlock Text="AUTHOR" />
                     <controls:RichTextBlock>[Sunrunner](github.com/Sunrunner37)</controls:RichTextBlock>
                     <TextBlock Text="NITROD FORK CONTRIBUTORS" />
-                    <controls:RichTextBlock>[Sinaosal](github.com/sinaosal) (code), [Prosims](github.com/Prosims) (logo)</controls:RichTextBlock>
+                    <controls:RichTextBlock>[Sinaosal](github.com/sinaosal) (code), [Prosims](github.com/Prosims-source) (logo)</controls:RichTextBlock>
                     <!--  Active contributors which have higher role than junior.  -->
                     <TextBlock Text="CONTRIBUTORS" />
                     <WrapPanel>

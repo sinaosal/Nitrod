@@ -69,6 +69,11 @@ internal partial class MainWindowViewModel : ViewModelBase, IRoutingScreen
         this.optionsViewModel = optionsViewModel;
         this.serverService = serverService;
 
+        if (!IsDesignMode)
+        {
+            ActiveViewModel = AssetHelper.GetFullAssetPath("/Assets/Icons/loading.svg");
+        }
+
         this.RegisterMessageListener<ShowViewMessage, MainWindowViewModel>(static (message, vm) => vm.ShowAsync(message.ViewModel));
         this.RegisterMessageListener<ShowPreviousViewMessage, MainWindowViewModel>(static (message, vm) => vm.BackToAsync(message.RoutableViewModelType));
         this.RegisterMessageListener<NotificationAddMessage, MainWindowViewModel>(static async (message, vm) =>
