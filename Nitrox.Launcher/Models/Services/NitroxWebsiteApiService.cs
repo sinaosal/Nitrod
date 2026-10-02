@@ -64,7 +64,7 @@ internal sealed class NitroxWebsiteApiService
             };
         }
 
-        return new NitroxRelease { Version = version, Platforms = platforms };
+        return new NitroxRelease { Version = version, DisplayVersion = release.DisplayVersion, Platforms = platforms };
     }
 
     /// <summary>
@@ -106,9 +106,41 @@ internal sealed class NitroxWebsiteApiService
         public Version? ParsedVersion => ParseReleaseVersion(TagName);
 
         [JsonIgnore]
+        public string DisplayVersion => TagName.TrimStart('v', 'V').Split('+')[0];
+
+        [JsonIgnore]
         public GitHubReleaseAsset? CurrentPlatformAsset => OperatingSystem.IsWindows()
-            ? Assets?.FirstOrDefault(static asset => asset.Name.EndsWith("-Win64.zip", StringComparison.OrdinalIgnoreCase))
+            ? Assets?.FirstOrDefault(static asset => asset.Name.EndsWith("Win64.zip", StringComparison.OrdinalIgnoreCase))
+                ?? Assets?.FirstOrDefault(static asset => asset.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
             : null;
+
+        public bool IsNewerThan(string currentVersion)
+            => IsReleaseVersionNewer(DisplayVersion, currentVersion);
+
+        public static bool IsReleaseVersionNewer(string releaseVersion, string currentVersion)
+        {
+            Version? releaseNumericVersion = ParseReleaseVersion(releaseVersion);
+            Version? installedVersion = ParseReleaseVersion(currentVersion);
+            if (releaseNumericVersion == null || installedVersion == null)
+            {
+                return false;
+            }
+
+            int numericComparison = releaseNumericVersion.CompareTo(installedVersion);
+            if (numericComparison != 0)
+            {
+                return numericComparison > 0;
+            }
+
+            string releasePrerelease = GetPrerelease(releaseVersion);
+            string installedPrerelease = GetPrerelease(currentVersion);
+            if (releasePrerelease.Length == 0)
+            {
+                return installedPrerelease.Length > 0;
+            }
+
+            return installedPrerelease.Length == 0 || string.Compare(releasePrerelease, installedPrerelease, StringComparison.OrdinalIgnoreCase) > 0;
+        }
 
         private static Version? ParseReleaseVersion(string tagName)
         {
@@ -119,6 +151,13 @@ internal sealed class NitroxWebsiteApiService
             }
 
             return new Version(parsedVersion.Major, parsedVersion.Minor, parsedVersion.Build, 0);
+        }
+
+        private static string GetPrerelease(string version)
+        {
+            string withoutBuildMetadata = version.Split('+')[0];
+            int separatorIndex = withoutBuildMetadata.IndexOf('-');
+            return separatorIndex < 0 ? "" : withoutBuildMetadata[(separatorIndex + 1)..];
         }
     }
 
@@ -144,6 +183,11 @@ internal sealed class NitroxWebsiteApiService
     {
         [JsonPropertyName("version")]
         public required Version Version { get; init; }
+
+        [JsonIgnore]
+        public required string DisplayVersion { get; init; }
+
+        public bool IsNewerThan(string currentVersion) => GitHubRelease.IsReleaseVersionNewer(DisplayVersion, currentVersion);
 
         [JsonPropertyName("platforms")]
         public Dictionary<string, PlatformInfo>? Platforms { get; init; }

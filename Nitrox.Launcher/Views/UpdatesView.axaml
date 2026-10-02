@@ -15,7 +15,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:designer="clr-namespace:Nitrox.Launcher.ViewModels.Designer"
     Classes.official="{Binding UsingOfficialVersion}"
-    Classes.newUpdate="{Binding NewUpdateAvailable}">
+    Classes.newUpdate="{Binding NewUpdateAvailable}"
+    Classes.missingInstaller="{Binding ReleaseInstallerMissing}">
     <UserControl.Styles>
         <Style Selector=":not(.official)">
             <Style Selector="^ controls|RecolorImage.updateIcon">
@@ -77,6 +78,19 @@
             <Style Selector="^ TextBlock.updateDescription">
                 <Setter Property="Text"
                         Value="Time for an update! A new version of Nitrod is now available to download. Back up your content and get the latest version to start using all the latest features and improvements." />
+            </Style>
+        </Style>
+
+        <Style Selector=".official.missingInstaller">
+            <Style Selector="^ TextBlock.updateHeader">
+                <Setter Property="Text" Value="Release Published, Installer Pending" />
+            </Style>
+            <Style Selector="^ TextBlock.updateDescription">
+                <Setter Property="Text">
+                    <MultiBinding StringFormat="Nitrod {0} is published, but its Windows installer has not been uploaded to GitHub yet.">
+                        <Binding Path="OfficialVersion" FallbackValue="the latest release" />
+                    </MultiBinding>
+                </Setter>
             </Style>
         </Style>
     </UserControl.Styles>
@@ -149,7 +163,7 @@
                                 Command="{Binding DownloadUpdateCommand}"
                                 HorizontalAlignment="Center"
                                 HorizontalContentAlignment="Center"
-                                IsVisible="{Binding !DownloadProgress, Mode=OneWay}"
+                                IsVisible="{Binding ShowDownloadButton, Mode=OneWay}"
                                 Margin="0,4,0,0"
                                 Padding="20,8"
                                 ToolTip.ShowOnDisabled="True">

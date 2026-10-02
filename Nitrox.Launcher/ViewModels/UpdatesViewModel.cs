@@ -41,6 +41,9 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
     public partial bool NewUpdateAvailable { get; set; }
 
     [ObservableProperty]
+    public partial bool ReleaseInstallerMissing { get; set; }
+
+    [ObservableProperty]
     public partial AvaloniaList<NitroxChangelog> NitroxChangelogs { get; set; } = [];
 
     [ObservableProperty]
@@ -54,6 +57,13 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
 
     [ObservableProperty]
     public partial string? Version { get; set; }
+
+    public bool ShowDownloadButton => NewUpdateAvailable && DownloadProgress <= 0;
+
+    partial void OnNewUpdateAvailableChanged(bool value) => OnPropertyChanged(nameof(ShowDownloadButton));
+
+    partial void OnDownloadProgressChanged(double value) => OnPropertyChanged(nameof(ShowDownloadButton));
+
     public async Task<bool> IsNitroxUpdateAvailableAsync()
     {
         try
@@ -62,20 +72,23 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
             NitroxWebsiteApiService.NitroxRelease? latestRelease = await nitroxWebsiteApi.GetNitroxLatestVersionAsync();
             Version latestVersion = latestRelease?.Version ?? new Version(0, 0);
 
-            NewUpdateAvailable = latestVersion > currentVersion && latestRelease?.CurrentPlatformInfo != null;
+            bool releaseIsNewer = latestRelease?.IsNewerThan(NitroxEnvironment.DisplayVersion) == true;
+            ReleaseInstallerMissing = releaseIsNewer && latestRelease?.CurrentPlatformInfo == null;
+            NewUpdateAvailable = releaseIsNewer && latestRelease?.CurrentPlatformInfo != null;
             if (NewUpdateAvailable)
             {
-                string versionMessage = $"A new version of the mod ({latestVersion}) is available.";
+                string versionMessage = $"A new version of the mod ({latestRelease!.DisplayVersion}) is available.";
                 Log.Info(versionMessage);
                 LauncherNotifier.Warning(versionMessage);
             }
-            Version = currentVersion.ToString();
-            OfficialVersion = latestVersion.ToString();
+            Version = NitroxEnvironment.DisplayVersion;
+            OfficialVersion = latestRelease?.DisplayVersion ?? latestVersion.ToString();
             UsingOfficialVersion = NitroxEnvironment.IsReleaseMode && latestVersion >= currentVersion;
         }
         catch
         {
             NewUpdateAvailable = false;
+            ReleaseInstallerMissing = false;
             UsingOfficialVersion = NitroxEnvironment.IsReleaseMode;
         }
 
@@ -199,7 +212,7 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
         }
         DialogBoxViewModel confirmResult = await dialogService.ShowAsync<DialogBoxViewModel>(model =>
         {
-            model.Title = $"Download and install Nitrod {latestRelease.Version} ({downloadInfo.FileSizeMegaBytes:F1} MB)?";
+            model.Title = $"Download and install Nitrod {latestRelease.DisplayVersion} ({downloadInfo.FileSizeMegaBytes:F1} MB)?";
             if (NitroxEnvironment.IsReleaseMode)
             {
                 model.Description = "This will overwrite your current Nitrod installation and restart Nitrod after the update is complete.\nPlease check if this update is compatible with your current save file before continuing.";
@@ -256,7 +269,7 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
             {
                 string currentDir = NitroxUser.LauncherPath ?? AppDomain.CurrentDomain.BaseDirectory;
                 string tempDir = Path.Combine(Path.GetTempPath(), $"NitroxUpdate {DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-                string zipPath = Path.Combine(tempDir, $"Nitrox_{latestRelease.Version}.zip");
+                string zipPath = Path.Combine(tempDir, $"Nitrod_{latestRelease.DisplayVersion}.zip");
                 string extractPath = Path.Combine(tempDir, "extract");
 
                 Directory.CreateDirectory(tempDir);

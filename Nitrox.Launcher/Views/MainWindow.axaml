@@ -203,7 +203,20 @@
             <!--  Navigation (left side)  -->
             <Border Classes="nav" Grid.Column="0">
                 <Grid RowDefinitions="80,*">
-                    <TextBlock Classes="header">NITROD</TextBlock>
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="34,18,0,14"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        VerticalAlignment="Center">
+                        <Image
+                            Width="34"
+                            Height="34"
+                            Source="/Assets/Images/nitrod-icon.ico"
+                            Stretch="Uniform"
+                            VerticalAlignment="Center" />
+                        <TextBlock Classes="header" Margin="0" VerticalAlignment="Center">NITROD</TextBlock>
+                    </StackPanel>
                     <Panel Grid.Row="1">
                         <StackPanel Classes="nav">
                             <TextBlock Classes="subheader">PLAY</TextBlock>
