@@ -11,6 +11,8 @@
         <ApplicationIcon>Assets\Images\nitrod-icon.ico</ApplicationIcon>
         <Product>Nitrod</Product>
         <AssemblyTitle>Nitrod Launcher</AssemblyTitle>
+        <AssemblyName>Nitrod.Launcher</AssemblyName>
+        <RootNamespace>Nitrox.Launcher</RootNamespace>
         <PublishTrimmed>false</PublishTrimmed>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>

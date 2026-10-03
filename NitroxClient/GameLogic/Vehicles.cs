@@ -166,7 +166,9 @@ public class Vehicles
 
     public static VehicleEntity BuildVehicleEntity(GameObject constructedObject, NitroxId constructedObjectId, TechType techType, NitroxId constructorId = null)
     {
-        VehicleEntity vehicleEntity = new(constructorId, DayNightCycle.main.timePassedAsFloat, constructedObject.transform.ToLocalDto(), string.Empty, false, constructedObjectId, techType.ToDto(), null);
+        PrefabIdentifier prefabIdentifier = constructedObject.GetComponent<PrefabIdentifier>();
+        string classId = prefabIdentifier ? prefabIdentifier.ClassId : string.Empty;
+        VehicleEntity vehicleEntity = new(constructorId, DayNightCycle.main.timePassedAsFloat, constructedObject.transform.ToLocalDto(), classId, false, constructedObjectId, techType.ToDto(), null);
         VehicleChildEntityHelper.PopulateChildren(constructedObjectId, constructedObject.GetFullHierarchyPath(), vehicleEntity.ChildEntities, constructedObject);
         return vehicleEntity;
     }

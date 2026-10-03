@@ -110,6 +110,35 @@
                 </Border>
             </StackPanel>
 
+            <!--  BepInEx Mods  -->
+            <StackPanel Spacing="12">
+                <StackPanel Spacing="8">
+                    <TextBlock
+                        FontSize="20"
+                        FontWeight="Bold"
+                        Text="BepInEx Mods" />
+                    <TextBlock FontSize="12" Text="Install a BepInEx mod ZIP into the selected Subnautica installation" />
+                </StackPanel>
+                <Border
+                    Background="{DynamicResource BrandPanelBackground}"
+                    CornerRadius="12"
+                    Padding="22,15">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="BepInEx must be installed. Multiplayer synchronization depends on the mod." />
+                        <Button
+                            Classes="primary"
+                            Command="{Binding InstallBepInExModCommand}"
+                            Content="Install mod from ZIP"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Margin="20,0,0,0"
+                            ToolTip.Tip="Choose a BepInEx mod archive to install" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+
             <!--  Launch Arguments  -->
             <StackPanel Spacing="12">
                 <StackPanel Spacing="8">

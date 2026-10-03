@@ -131,16 +131,16 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
 
         string scriptPath;
         string scriptContent;
-        string launcherFilePath = Path.Combine(destinationPath, Path.GetFileName(NitroxUser.ExecutableFilePath) ?? throw new Exception("Failed to get executable file name"));
+        string launcherFilePath = Path.Combine(destinationPath, UpdatePackage.GetLauncherFileName(sourcePath));
 
         if (OperatingSystem.IsWindows())
         {
             scriptPath = Path.Combine(tempDir, "update.bat");
             scriptContent = $"""
                              @echo off
-                             echo Waiting for Nitrox Launcher to close...
+                             echo Waiting for Nitrod Launcher to close...
                              :waitloop
-                             tasklist /FI "IMAGENAME eq Nitrox.Launcher.exe" 2>NUL | find /I /N "Nitrox.Launcher.exe">NUL
+                             tasklist /FI "PID eq {Environment.ProcessId}" /NH 2>NUL | findstr /R /C:" {Environment.ProcessId} ">NUL
                              if "%ERRORLEVEL%"=="0" (
                                  timeout /t 1 /nobreak >nul
                                  goto waitloop
@@ -161,8 +161,12 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
                                  pause >nul
                                  exit /b 1
                              )
-                             echo Starting Nitrox Launcher...
-                             start "" "{launcherFilePath}"
+                             if not exist "{launcherFilePath}" (
+                                 echo Update failed: launcher is missing.
+                                 exit /b 1
+                             )
+                             echo Starting Nitrod Launcher...
+                             start "" /D "{destinationPath}" "{launcherFilePath}"
                              exit
                              """;
         }
@@ -171,8 +175,8 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
             scriptPath = Path.Combine(tempDir, "update.sh");
             scriptContent = $"""
                              #!/bin/bash
-                             echo "Waiting for Nitrox Launcher to close..."
-                             while pgrep -x "{NitroxConstants.LAUNCHER_APP_NAME}" > /dev/null; do
+                             echo "Waiting for Nitrod Launcher to close..."
+                             while kill -0 {Environment.ProcessId} 2>/dev/null; do
                                  sleep 1
                              done
                              echo "Cleaning old installation..."
@@ -185,8 +189,9 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
                              rm -rf "{destinationPath}/runtimes" 2>/dev/null
                              rm -rf "{destinationPath}/Resources" 2>/dev/null
                              echo "Installing update..."
-                             cp -rf "{sourcePath}/"* "{destinationPath}/"
-                             echo "Starting Nitrox Launcher..."
+                             cp -rf "{sourcePath}/"* "{destinationPath}/" || exit 1
+                             cd "{destinationPath}" || exit 1
+                             echo "Starting Nitrod Launcher..."
                              chmod +x "{launcherFilePath}"
                              nohup "{launcherFilePath}" >/dev/null 2>&1 &
                              """;
@@ -320,12 +325,7 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
                 await ZipFile.ExtractToDirectoryAsync(zipPath, extractPath);
 
                 // Find the Nitrox folder inside the extracted content
-                string nitroxFolder = extractPath;
-                string[] subDirs = Directory.GetDirectories(extractPath);
-                if (subDirs.Length == 1)
-                {
-                    nitroxFolder = subDirs[0];
-                }
+                string nitroxFolder = UpdatePackage.FindLauncherDirectory(extractPath);
 
                 // Create the updater batch script
                 string scriptFilePath = await CreateUpdaterScriptAsync(nitroxFolder, currentDir, tempDir);
@@ -334,11 +334,11 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
                 LauncherNotifier.Success("Update downloaded successfully. Restarting to apply update...");
 
                 // Start the updater script and exit
-                using Process? script = ProcessEx.StartProcessDetached(new ProcessStartInfo
+                using Process? script = UpdatePackage.StartInstaller(scriptFilePath);
+                if (script == null)
                 {
-                    FileName = scriptFilePath,
-                    CreateNoWindow = true
-                });
+                    throw new Exception("Failed to start the update installer. The launcher will remain open.");
+                }
                 mainWindowProvider().CloseByCode();
             }
             catch (OperationCanceledException)
@@ -439,11 +439,12 @@ internal partial class UpdatesViewModel(NitroxWebsiteApiService nitroxWebsiteApi
         LauncherNotifier.Success("Restoring backup... The launcher will restart.");
 
         // Start the restore script and exit
-        using Process? script = ProcessEx.StartProcessDetached(new ProcessStartInfo
+        using Process? script = UpdatePackage.StartInstaller(scriptPath);
+        if (script == null)
         {
-            FileName = scriptPath,
-            CreateNoWindow = true
-        });
+            LauncherNotifier.Error("Failed to start the backup installer. The launcher will remain open.");
+            return;
+        }
         mainWindowProvider().CloseByCode();
     }
 

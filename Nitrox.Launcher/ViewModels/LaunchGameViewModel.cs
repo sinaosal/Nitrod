@@ -24,10 +24,12 @@ using Nitrox.Model.Platforms.Store;
 
 namespace Nitrox.Launcher.ViewModels;
 
-internal partial class LaunchGameViewModel(DialogService dialogService, ServerService serverService, OptionsViewModel optionsViewModel, IKeyValueStore keyValueStore)
+internal partial class LaunchGameViewModel(DialogService dialogService, ServerService serverService, OptionsViewModel optionsViewModel, IKeyValueStore keyValueStore, HttpFileService httpFileService)
     : RoutableViewModelBase
 {
+    private const string BepInExPromptedKey = "BepInExInstallPrompted";
     private static bool hasInstantLaunched;
+    private readonly BepInExInstaller bepInExInstaller = new(httpFileService);
     private readonly DialogService dialogService = dialogService;
     private readonly IKeyValueStore keyValueStore = keyValueStore;
 
@@ -129,6 +131,8 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
                     return false;
                 }
 
+                await OfferBepInExInstallAsync(NitroxUser.GamePath);
+
                 // TODO: The launcher should override FileRead win32 API for the Subnautica process to give it the modified Assembly-CSharp from memory
                 NitroxEntryPatch.TraceStep("StartMultiplayerAsync: before patcher dll copy");
                 try
@@ -193,6 +197,36 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
             Log.Error(ex, "Error while starting game in multiplayer mode:");
             await dialogService.ShowErrorAsync(ex, "Error while starting game in multiplayer mode");
         }
+    }
+
+    private async Task OfferBepInExInstallAsync(string gamePath)
+    {
+        if (!OperatingSystem.IsWindows() || BepInExInstaller.IsInstalled(gamePath) || keyValueStore.GetValue(BepInExPromptedKey, false))
+        {
+            return;
+        }
+
+        DialogBoxViewModel? prompt = await dialogService.ShowAsync<DialogBoxViewModel>(model =>
+        {
+            model.Title = "Install BepInEx?";
+            model.Description = "Would you like Nitrod to install the official BepInEx pack in your Subnautica folder? It enables BepInEx plugins to load, but modded gameplay is not automatically synchronized between players.";
+            model.ButtonOptions = ButtonOptions.YesNo;
+        });
+
+        if (prompt is null)
+        {
+            return;
+        }
+
+        if (prompt.SelectedOption != ButtonOptions.Yes)
+        {
+            keyValueStore.SetValue(BepInExPromptedKey, true);
+            return;
+        }
+
+        await bepInExInstaller.InstallAsync(gamePath);
+        keyValueStore.SetValue(BepInExPromptedKey, true);
+        LauncherNotifier.Success("BepInEx is installed and will load when Subnautica starts.");
     }
 
     [RelayCommand]

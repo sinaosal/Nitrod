@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -13,6 +14,14 @@ namespace NitroxPatcher.Patches.Dynamic;
 public sealed partial class SpawnConsoleCommand_SpawnAsync_Patch : NitroxPatch, IDynamicPatch
 {
     internal static readonly MethodInfo TARGET_METHOD = AccessTools.EnumeratorMoveNext(Reflect.Method((SpawnConsoleCommand t) => t.SpawnAsync(default)));
+    private static string pendingScaleTechType;
+    private static float pendingScale;
+
+    public static void SetNextSpawnScale(string techType, float scale)
+    {
+        pendingScaleTechType = techType;
+        pendingScale = scale;
+    }
 
     /*
      * MODIFIED:
@@ -37,6 +46,16 @@ public sealed partial class SpawnConsoleCommand_SpawnAsync_Patch : NitroxPatch, 
 
     public static void Callback(GameObject gameObject)
     {
+        if (pendingScaleTechType != null)
+        {
+            TechType techType = CraftData.GetTechType(gameObject);
+            if (string.Equals(techType.ToString(), pendingScaleTechType, StringComparison.OrdinalIgnoreCase))
+            {
+                gameObject.transform.localScale *= pendingScale;
+            }
+            pendingScaleTechType = null;
+        }
+
         Resolve<NitroxConsole>().Spawn(gameObject);
     }
 }

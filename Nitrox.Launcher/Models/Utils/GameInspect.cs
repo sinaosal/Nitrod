@@ -79,7 +79,7 @@ internal static class GameInspect
         if (modDllCount > 0)
         {
             Log.Warn($"BepInEx plugins detected: {modDllCount}");
-            LauncherNotifier.Warning($"BepInEx mod(s) were detected ({modDllCount}). Nitrod multiplayer does not support mods and they may cause instability.");
+            LauncherNotifier.Warning($"BepInEx plugin(s) detected ({modDllCount}). Modded gameplay is not automatically synchronized in Nitrod multiplayer and may cause instability.");
         }
 
         static IEnumerable<string> GetDllPaths(string path)

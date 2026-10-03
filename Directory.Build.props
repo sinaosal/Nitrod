@@ -6,7 +6,7 @@
     <!-- Framework properties -->
     <PropertyGroup>
         <LangVersion>14</LangVersion>
-        <Version>1.9.7-dev</Version>
+        <Version>2.0.0-dev</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Prefer32Bit>false</Prefer32Bit>
         <DebugType>embedded</DebugType>

@@ -233,7 +233,7 @@ public class BackupService(IKeyValueStore keyValueStore)
             Directory.CreateDirectory(tempDir);
 
             string extractPath = Path.Combine(tempDir, "extract");
-            string launcherFilePath = Path.Combine(launcherPath, Path.GetFileName(NitroxUser.ExecutableFilePath) ?? "Nitrox.Launcher.exe");
+            string launcherFilePath = Path.Combine(launcherPath, "Nitrod.Launcher.exe");
 
             string scriptPath;
             string scriptContent;
@@ -243,9 +243,9 @@ public class BackupService(IKeyValueStore keyValueStore)
                 scriptPath = Path.Combine(tempDir, "restore.bat");
                 scriptContent = $"""
                                  @echo off
-                                 echo Waiting for Nitrox Launcher to close...
+                                 echo Waiting for Nitrod Launcher to close...
                                  :waitloop
-                                 tasklist /FI "IMAGENAME eq Nitrox.Launcher.exe" 2>NUL | find /I /N "Nitrox.Launcher.exe">NUL
+                                 tasklist /FI "PID eq {Environment.ProcessId}" /NH 2>NUL | findstr /R /C:" {Environment.ProcessId} ">NUL
                                  if "%ERRORLEVEL%"=="0" (
                                      timeout /t 1 /nobreak >nul
                                      goto waitloop
@@ -275,8 +275,12 @@ public class BackupService(IKeyValueStore keyValueStore)
                                  )
                                  echo Cleaning up...
                                  rmdir /S /Q "{extractPath}" 2>nul
-                                 echo Restore complete! Starting Nitrox Launcher...
-                                 start "" "{launcherFilePath}"
+                                 echo Restore complete! Starting launcher...
+                                 if exist "{launcherFilePath}" (
+                                     start "" /D "{launcherPath}" "{launcherFilePath}"
+                                 ) else (
+                                     start "" /D "{launcherPath}" "{launcherPath}\Nitrox.Launcher.exe"
+                                 )
                                  exit
                                  """;
             }
@@ -285,8 +289,8 @@ public class BackupService(IKeyValueStore keyValueStore)
                 scriptPath = Path.Combine(tempDir, "restore.sh");
                 scriptContent = $"""
                                  #!/bin/bash
-                                 echo "Waiting for Nitrox Launcher to close..."
-                                 while pgrep -x "{NitroxConstants.LAUNCHER_APP_NAME}" > /dev/null; do
+                                 echo "Waiting for Nitrod Launcher to close..."
+                                 while kill -0 {Environment.ProcessId} 2>/dev/null; do
                                      sleep 1
                                  done
                                  echo "Extracting backup..."
@@ -313,9 +317,12 @@ public class BackupService(IKeyValueStore keyValueStore)
                                  fi
                                  echo "Cleaning up..."
                                  rm -rf "{extractPath}" 2>/dev/null
-                                 echo "Restore complete! Starting Nitrox Launcher..."
-                                 chmod +x "{launcherFilePath}"
-                                 nohup "{launcherFilePath}" >/dev/null 2>&1 &
+                                 echo "Restore complete! Starting launcher..."
+                                 cd "{launcherPath}" || exit 1
+                                 launcher="{launcherPath}/Nitrod.Launcher"
+                                 if [ ! -f "$launcher" ]; then launcher="{launcherPath}/Nitrox.Launcher"; fi
+                                 chmod +x "$launcher"
+                                 nohup "$launcher" >/dev/null 2>&1 &
                                  """;
             }
 

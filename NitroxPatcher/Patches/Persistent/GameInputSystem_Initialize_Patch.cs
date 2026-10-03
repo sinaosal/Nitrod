@@ -70,7 +70,13 @@ public partial class GameInputSystem_Initialize_Patch : NitroxPatch, IPersistent
         foreach (KeyBinding keyBinding in KeyBindingManager.KeyBindings)
         {
             GameInput.Button button = (GameInput.Button)buttonId++;
-            gameInputSystem.actions[button].started += keyBinding.Execute;
+            if (!gameInputSystem.actions.TryGetValue(button, out InputAction inputAction))
+            {
+                Log.Warn($"Skipping Nitrox key binding '{keyBinding.ButtonLabel}' because its input action ({button}) was not registered.");
+                continue;
+            }
+
+            inputAction.started += keyBinding.Execute;
         }
     }
 }

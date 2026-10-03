@@ -8,6 +8,7 @@ using Nitrox.Model.Helper;
 using Nitrox.Model.Subnautica.DataStructures.GameLogic.Entities;
 using Nitrox.Model.Subnautica.DataStructures.GameLogic.Entities.Metadata;
 using UnityEngine;
+using UWE;
 
 namespace NitroxClient.GameLogic.Spawning.WorldEntities;
 
@@ -61,11 +62,23 @@ public class VehicleEntitySpawner : EntitySpawner<VehicleEntity>
         }
         else
         {
-            CoroutineTask<GameObject> techPrefabCoroutine = CraftData.GetPrefabForTechTypeAsync(techType, false);
-            yield return techPrefabCoroutine;
-            GameObject techPrefab = techPrefabCoroutine.GetResult();
-            gameObject = Utils.SpawnPrefabAt(techPrefab, null, vehicleEntity.Transform.Position.ToUnity());
-            Validate.NotNull(gameObject, $"{nameof(VehicleEntitySpawner)}: No prefab for tech type: {techType}");
+            GameObject vehiclePrefab = null;
+            if (!string.IsNullOrEmpty(vehicleEntity.ClassId))
+            {
+                IPrefabRequest prefabRequest = PrefabDatabase.GetPrefabAsync(vehicleEntity.ClassId);
+                yield return prefabRequest;
+                prefabRequest.TryGetPrefab(out vehiclePrefab);
+            }
+
+            if (!vehiclePrefab)
+            {
+                CoroutineTask<GameObject> techPrefabCoroutine = CraftData.GetPrefabForTechTypeAsync(techType, false);
+                yield return techPrefabCoroutine;
+                vehiclePrefab = techPrefabCoroutine.GetResult();
+            }
+
+            gameObject = Utils.SpawnPrefabAt(vehiclePrefab, null, vehicleEntity.Transform.Position.ToUnity());
+            Validate.NotNull(gameObject, $"{nameof(VehicleEntitySpawner)}: No prefab for tech type {techType} or class ID {vehicleEntity.ClassId}");
 
             if (gameObject.TryGetComponent(out vehicle))
             {

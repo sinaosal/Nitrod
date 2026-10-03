@@ -15,6 +15,8 @@ public sealed partial class PropulsionCannon_GrabObject_Patch : NitroxPatch, IDy
 
     private static bool skipPrefixPatch;
 
+    public static bool ChaosModeEnabled { get; set; }
+
     public static bool Prefix(PropulsionCannon __instance, GameObject target)
     {
         if (skipPrefixPatch)
@@ -33,7 +35,7 @@ public sealed partial class PropulsionCannon_GrabObject_Patch : NitroxPatch, IDy
             return true;
         }
 
-        if (IsInvalidGrabTarget(target))
+        if (!ChaosModeEnabled && IsInvalidGrabTarget(target))
         {
             return false;
         }

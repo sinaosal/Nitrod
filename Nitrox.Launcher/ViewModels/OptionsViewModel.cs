@@ -23,10 +23,12 @@ using Nitrox.Model.Platforms.OS.Shared;
 
 namespace Nitrox.Launcher.ViewModels;
 
-internal partial class OptionsViewModel(IKeyValueStore keyValueStore, StorageService storageService) : RoutableViewModelBase
+internal partial class OptionsViewModel(IKeyValueStore keyValueStore, StorageService storageService, DialogService dialogService, HttpFileService httpFileService) : RoutableViewModelBase
 {
     private readonly IKeyValueStore keyValueStore = keyValueStore;
     private readonly StorageService storageService = storageService;
+    private readonly DialogService dialogService = dialogService;
+    private readonly BepInExInstaller bepInExInstaller = new(httpFileService);
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SetArgumentsCommand))]
@@ -141,6 +143,91 @@ internal partial class OptionsViewModel(IKeyValueStore keyValueStore, StorageSer
         })).FirstOrDefault()?.TryGetLocalPath() ?? "";
 
         await ApplyGamePathAsync(selectedExecutable, true);
+    }
+
+    [RelayCommand]
+    private async Task InstallBepInExModAsync()
+    {
+        string gamePath = SelectedGame?.PathToGame ?? "";
+        if (!Directory.Exists(gamePath))
+        {
+            LauncherNotifier.Error("Set the Subnautica installation path before installing a mod.");
+            return;
+        }
+
+        string archivePath = (await storageService.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select a BepInEx mod ZIP",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("BepInEx mod archive")
+                {
+                    Patterns = ["*.zip"]
+                }
+            ]
+        })).FirstOrDefault()?.TryGetLocalPath() ?? "";
+
+        if (string.IsNullOrWhiteSpace(archivePath))
+        {
+            return;
+        }
+
+        bool isBepInExInstalled = OperatingSystem.IsWindows()
+            ? BepInExInstaller.IsInstalled(gamePath)
+            : BepInExModInstaller.IsBepInExInstalled(gamePath);
+        if (!isBepInExInstalled)
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                LauncherNotifier.Error("Install BepInEx for Subnautica before installing a mod archive.");
+                return;
+            }
+
+            DialogBoxViewModel? loaderConfirmation = await dialogService.ShowAsync<DialogBoxViewModel>(model =>
+            {
+                model.Title = "Install BepInEx first?";
+                model.Description = "BepInEx is required to load this mod. Install the official BepInEx pack into the selected Subnautica folder now?";
+                model.ButtonOptions = ButtonOptions.YesNo;
+            });
+
+            if (loaderConfirmation?.SelectedOption != ButtonOptions.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                await bepInExInstaller.InstallAsync(gamePath);
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowErrorAsync(ex, "Failed to install BepInEx");
+                return;
+            }
+        }
+
+        DialogBoxViewModel? modConfirmation = await dialogService.ShowAsync<DialogBoxViewModel>(model =>
+        {
+            model.Title = "Install BepInEx mod?";
+            model.Description = $"Install {Path.GetFileName(archivePath)} into the selected Subnautica installation? Existing files in BepInEx plugin folders may be replaced.";
+            model.ButtonOptions = ButtonOptions.YesNo;
+        });
+
+        if (modConfirmation?.SelectedOption != ButtonOptions.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            int installedFiles = await Task.Run(() => BepInExModInstaller.Install(archivePath, gamePath));
+            LauncherNotifier.Success($"Installed BepInEx mod archive ({installedFiles} files).");
+        }
+        catch (Exception ex)
+        {
+            await dialogService.ShowErrorAsync(ex, "Failed to install BepInEx mod");
+        }
     }
 
     private async Task ApplyGamePathAsync(string selectedPath, bool enableDirectLaunch = false)

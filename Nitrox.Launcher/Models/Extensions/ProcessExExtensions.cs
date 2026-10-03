@@ -20,7 +20,7 @@ public static class ProcessExExtensions
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             // xdotool sends an XEvent to X11 window manager on Linux systems. 
-            string command = $"xdotool windowactivate $(xdotool search --pid {process.Id} --onlyvisible --desktop '$(xdotool get_desktop)' --name 'nitrox launcher')";
+            string command = $"xdotool windowactivate $(xdotool search --pid {process.Id} --onlyvisible --desktop '$(xdotool get_desktop)' --name 'Nitrod Launcher')";
             using Process proc = Process.Start(new ProcessStartInfo
             {
                 FileName = "sh",
