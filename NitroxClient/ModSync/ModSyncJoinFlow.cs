@@ -38,11 +38,12 @@ public static class ModSyncJoinFlow
             return;
         }
 
-        panel.ShowChecking(serverAddress);
-        // DIMA001: static flow started from the static JoinServerBackend; the client belongs to the join's new lifetime scope.
+        // Resolve before touching the UI: the client belongs to this join attempt's lifetime scope.
+        // DIMA001: static flow started from the static JoinServerBackend; there is no constructor to inject into.
 #pragma warning disable DIMA001
         ModSyncClient client = NitroxServiceLocator.LocateService<ModSyncClient>();
 #pragma warning restore DIMA001
+        panel.ShowChecking(serverAddress);
         ModManifestResponse response = await client.RequestManifestAsync(manifestTimeout);
         if (response == null)
         {

@@ -18,7 +18,7 @@ internal sealed class ModManifestRequestProcessor(ModSyncService modSyncService,
     {
         SubnauticaServerOptions options = serverOptions.Value;
         ModManifest manifest = options.ModSyncEnabled ? await modSyncService.GetManifestAsync() : ModManifest.Empty();
-        logger.ZLogDebug($"Sending mod manifest ({manifest.Packages.Count} package(s)) to session #{context.Sender.SessionId}");
+        logger.ZLogInformation($"Mod sync: session #{context.Sender.SessionId} is checking mods ({manifest.Packages.Count} package(s), {ModSyncLimits.FormatSize(manifest.TotalSize)} shared)");
         await context.ReplyAsync(new ModManifestResponse(options.ModSyncEnabled, options.ModSyncEnabled && options.ModSyncAllowDownloads, options.ModSyncRequireMatchingMods,
                                                          startOptions.Value.SaveName, manifest));
     }
@@ -90,6 +90,7 @@ internal sealed class ModFileChunkRequestProcessor(ModSyncService modSyncService
         }
 
         await context.ReplyAsync(new ModFileChunkResponse(packet.Sha256, packet.Offset, file.Size, data, ""));
+        modSyncService.RecordUpload(context.Sender.SessionId, count);
 
         Task ReplyErrorAsync(string error) => context.ReplyAsync(new ModFileChunkResponse(packet.Sha256, packet.Offset, 0, [], error));
     }

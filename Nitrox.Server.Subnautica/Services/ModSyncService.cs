@@ -21,17 +21,61 @@ internal sealed class ModSyncService(IOptions<ServerStartOptions> startOptions, 
     private readonly IOptions<SubnauticaServerOptions> serverOptions = serverOptions;
     private readonly ILogger<ModSyncService> logger = logger;
     private readonly ConcurrentDictionary<SessionId, UploadBudget> uploadBudgets = new();
+    private readonly ConcurrentDictionary<SessionId, TransferProgress> transfers = new();
+    private readonly CancellationTokenSource stopReporting = new();
     private readonly Lock scanLock = new();
     private Task<Snapshot>? scanTask;
+
+    /// <summary>How often the console shows the progress of running mod downloads.</summary>
+    private static readonly TimeSpan progressReportInterval = TimeSpan.FromSeconds(5);
+
+    /// <summary>A download with no requests for this long is reported as finished (or paused) and forgotten.</summary>
+    private static readonly TimeSpan transferIdleTimeout = TimeSpan.FromSeconds(15);
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         // Scanning hashes every mod file; don't hold up server startup for it.
         RequestRescan();
+        _ = ReportProgressLoopAsync(stopReporting.Token);
         return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        stopReporting.Cancel();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Records bytes sent to a player so the host can follow downloads live in the server console.</summary>
+    public void RecordUpload(SessionId session, int bytes) => transfers.GetOrAdd(session, _ => new TransferProgress()).Add(bytes);
+
+    private async Task ReportProgressLoopAsync(CancellationToken cancellationToken)
+    {
+        using PeriodicTimer timer = new(progressReportInterval);
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                foreach (KeyValuePair<SessionId, TransferProgress> pair in transfers)
+                {
+                    TransferProgress.Report report = pair.Value.TakeReport();
+                    if (report.IdleFor >= transferIdleTimeout)
+                    {
+                        transfers.TryRemove(pair.Key, out _);
+                        logger.ZLogInformation($"Mod sync: session #{pair.Key} stopped downloading (finished or paused): {ModSyncLimits.FormatSize(report.TotalBytes)} sent in {report.Duration.TotalSeconds:0}s");
+                    }
+                    else if (report.BytesSinceLastReport > 0)
+                    {
+                        logger.ZLogInformation($"Mod sync: session #{pair.Key} downloading: {ModSyncLimits.FormatSize(report.TotalBytes)} sent, {ModSyncLimits.FormatSize((long)(report.BytesSinceLastReport / progressReportInterval.TotalSeconds))}/s");
+                    }
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Server is stopping.
+        }
+    }
 
     public async Task<ModManifest> GetManifestAsync() => (await GetSnapshotAsync()).Manifest;
 
@@ -156,6 +200,37 @@ internal sealed class ModSyncService(IOptions<ServerStartOptions> startOptions, 
     private sealed record Snapshot(ModManifest Manifest, Dictionary<string, PublishedFile> FilesByHash)
     {
         public static readonly Snapshot Empty = new(ModManifest.Empty(), []);
+    }
+
+    private sealed class TransferProgress
+    {
+        private readonly Lock progressLock = new();
+        private readonly DateTime startedUtc = DateTime.UtcNow;
+        private DateTime lastActivityUtc = DateTime.UtcNow;
+        private long totalBytes;
+        private long bytesSinceLastReport;
+
+        public void Add(int bytes)
+        {
+            lock (progressLock)
+            {
+                totalBytes += bytes;
+                bytesSinceLastReport += bytes;
+                lastActivityUtc = DateTime.UtcNow;
+            }
+        }
+
+        public Report TakeReport()
+        {
+            lock (progressLock)
+            {
+                Report report = new(totalBytes, bytesSinceLastReport, DateTime.UtcNow - lastActivityUtc, lastActivityUtc - startedUtc);
+                bytesSinceLastReport = 0;
+                return report;
+            }
+        }
+
+        public readonly record struct Report(long TotalBytes, long BytesSinceLastReport, TimeSpan IdleFor, TimeSpan Duration);
     }
 
     /// <summary>Token bucket: tracks when the session's already-reserved bytes will have been "sent" at the allowed rate.</summary>
