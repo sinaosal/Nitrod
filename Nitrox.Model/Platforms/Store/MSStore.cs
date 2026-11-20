@@ -15,11 +15,9 @@ public sealed class MSStore : IGamePlatform
 
     public bool OwnsGame(string gameDirectory)
     {
-#if DEBUG
-        // Development/testing override.
-        // This is only compiled into Debug builds.
-        return true;
-#else
+        // Note: a former Debug-only "return true" here made every install (including Steam ones) look like a Microsoft Store
+        // install in Debug builds, so Steam was never started and Debug/Release behaved differently. Use the real check always;
+        // use the "launch directly" option for standalone installs instead.
         bool isLocalAppData = Path.GetFullPath(gameDirectory).StartsWith(
             Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -28,7 +26,6 @@ public sealed class MSStore : IGamePlatform
 
         return isLocalAppData || File.Exists(
             Path.Combine(gameDirectory, "appxmanifest.xml"));
-#endif
     }
 
     public static async Task<ProcessEx> StartGameAsync(

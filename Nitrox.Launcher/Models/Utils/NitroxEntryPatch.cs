@@ -50,10 +50,16 @@ public static class NitroxEntryPatch
     /// <returns>The worker process exit code: 0 on success, 1 on a normal caught exception, anything else indicates a fatal/native crash in the worker.</returns>
     public static async Task<int> ApplyInIsolatedProcessAsync(string subnauticaBasePath)
     {
-        string launcherExe = Process.GetCurrentProcess().MainModule?.FileName ?? throw new InvalidOperationException("Unable to determine launcher executable path.");
+        string launcherExe = Environment.ProcessPath ?? throw new InvalidOperationException("Unable to determine launcher executable path.");
 
         TraceStep($"Spawning isolated patch worker for '{subnauticaBasePath}'");
         ProcessStartInfo startInfo = new(launcherExe) { UseShellExecute = false, CreateNoWindow = true };
+        // When started as "dotnet Nitrod.Launcher.dll" the process is the dotnet host, which needs the entry assembly as first argument.
+        if (Path.GetFileNameWithoutExtension(launcherExe).Equals("dotnet", StringComparison.OrdinalIgnoreCase) &&
+            System.Reflection.Assembly.GetEntryAssembly()?.Location is { Length: > 0 } entryAssemblyPath)
+        {
+            startInfo.ArgumentList.Add(entryAssemblyPath);
+        }
         startInfo.ArgumentList.Add(APPLY_PATCH_ARG);
         startInfo.ArgumentList.Add(subnauticaBasePath);
 

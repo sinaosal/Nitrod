@@ -67,17 +67,20 @@ namespace NitroxClient.Communication.MultiplayerSession
         }
 
         [TestMethod]
-        public void ProcessSessionPolicyShouldNegotiateAcrossCompatibleVersions()
+        public void ProcessSessionPolicyShouldNegotiateWhenServerVersionIsNetworkCompatible()
         {
             // Arrange
             IClient client = Substitute.For<IClient>();
             IMultiplayerSessionConnectionState connectionState = Substitute.For<IMultiplayerSessionConnectionState>();
             IMultiplayerSession multiplayerSession = new MultiplayerSessionManager(client, connectionState);
-            MultiplayerSessionPolicy version18Policy = new(TestConstants.TestSessionId, false, MultiplayerSessionAuthenticationAuthority.SERVER,
-                                                           false, TestConstants.TEST_MAX_PLAYER_CONNECTIONS, new NitroxVersion(1, 8));
+            // Derive the server version from the build under test so this test does not break on every version bump.
+            // Cross-version rules themselves are covered by NitroxVersionTest.NetworkCompatibility.
+            Version localVersion = Nitrox.Model.Core.NitroxEnvironment.Version;
+            MultiplayerSessionPolicy compatiblePolicy = new(TestConstants.TestSessionId, false, MultiplayerSessionAuthenticationAuthority.SERVER,
+                                                            false, TestConstants.TEST_MAX_PLAYER_CONNECTIONS, new NitroxVersion(localVersion.Major, localVersion.Minor));
 
             // Act
-            multiplayerSession.ProcessSessionPolicy(version18Policy);
+            multiplayerSession.ProcessSessionPolicy(compatiblePolicy);
 
             // Assert
             connectionState.Received(1).NegotiateReservationAsync(Arg.Any<IMultiplayerSessionConnectionContext>());

@@ -36,6 +36,8 @@
         <PackageVersion Include="MagicOnion.Client" Version="7.10.2" />
         <PackageVersion Include="MagicOnion.Server" Version="7.10.2" />
         <PackageVersion Include="Markdig" Version="1.4.0" />
+        <!-- Pulled in transitively by MagicOnion. Referenced directly from Nitrox.Model to lift it past GHSA-qhrr-8q5h-9q3h (fixed in 3.1.9). -->
+        <PackageVersion Include="MessagePack" Version="3.1.12" />
         <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(NetSdkVersion)" />
         <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(NetSdkVersion)" />
         <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(NetSdkVersion)" />
@@ -68,5 +70,18 @@
         <PackageVersion Include="System.Text.Json" Version="$(NetSdkVersion)" />
         <PackageVersion Include="System.ValueTuple" Version="4.6.1" />
         <PackageVersion Include="ZLogger" Version="2.5.10" />
+    </ItemGroup>
+    <!--
+        SixLabors.ImageSharp is pinned to 2.1.x; the advisories below are only fixed in 3.2.0+.
+        It is only used by Nitrox.Server.Subnautica (RandomStartResource) via Image.LoadPixelData + Flip on a raw texture from the
+        game's own asset bundle, so none of the affected code paths (TIFF encoders, ICC/BigTIFF decoding, histogram equalization)
+        are reachable. Re-evaluate if ImageSharp is ever used to decode untrusted or encoded image files.
+    -->
+    <ItemGroup>
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-gwg2-r3hj-4w44" />
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j3p4-wp97-rph4" />
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j9gm-c75j-xc9q" />
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-jjfr-hcj7-qf5w" />
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-wmxv-xphr-5c9g" />
     </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,13 +19,15 @@ using Nitrox.Model.Constants;
 using Nitrox.Model.Core;
 using Nitrox.Model.Helper;
 using Nitrox.Model.Logger;
+using Nitrox.Model.ModSync;
 using Nitrox.Model.Platforms.Discovery.Models;
 using Nitrox.Model.Platforms.OS.Shared;
 using Nitrox.Model.Platforms.Store;
 
 namespace Nitrox.Launcher.ViewModels;
 
-internal partial class LaunchGameViewModel(DialogService dialogService, ServerService serverService, OptionsViewModel optionsViewModel, IKeyValueStore keyValueStore, HttpFileService httpFileService)
+internal partial class LaunchGameViewModel(DialogService dialogService, ServerService serverService, OptionsViewModel optionsViewModel, IKeyValueStore keyValueStore, HttpFileService httpFileService,
+                                           ModsViewModel modsViewModel, ServersViewModel serversViewModel)
     : RoutableViewModelBase
 {
     private const string BepInExPromptedKey = "BepInExInstallPrompted";
@@ -51,6 +54,40 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
 
     public string Version => NitroxEnvironment.DisplayVersion;
 
+    // Status row on the home page. Each tile has a value, a detail line and an OK flag that switches its indicator color.
+    [ObservableProperty]
+    public partial string GameStatus { get; set; } = "Checking…";
+
+    [ObservableProperty]
+    public partial string GameStatusDetail { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool GameOk { get; set; } = true;
+
+    [ObservableProperty]
+    public partial string LoaderStatus { get; set; } = "Checking…";
+
+    [ObservableProperty]
+    public partial string LoaderStatusDetail { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool LoaderOk { get; set; } = true;
+
+    [ObservableProperty]
+    public partial string ModsStatus { get; set; } = "Checking…";
+
+    [ObservableProperty]
+    public partial string ModsStatusDetail { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool ModsOk { get; set; } = true;
+
+    [ObservableProperty]
+    public partial string ServerStatus { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string ServerStatusDetail { get; set; } = "";
+
     internal override async Task ViewContentLoadAsync(CancellationToken cancellationToken = default)
     {
         await Task.Run(() =>
@@ -61,7 +98,48 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
                 : GamePlatform.GetAttribute<DescriptionAttribute>()?.Description ?? "";
             HandleInstantLaunchForDevelopment();
         }, cancellationToken);
+        _ = RefreshStatusAsync().ContinueWithHandleError(ex => Log.Error(ex, "Failed to refresh home status"));
     }
+
+    private async Task RefreshStatusAsync()
+    {
+        string? gamePath = ModManagerService.CurrentGamePath;
+        int onlineServers = serverService.Servers.Count(s => s.IsOnline);
+        ServerStatus = onlineServers > 0 ? $"{onlineServers} hosting" : "Not hosting";
+        ServerStatusDetail = onlineServers > 0 ? "Players can join your world" : "Host or join from Multiplayer";
+
+        if (gamePath == null)
+        {
+            (GameStatus, GameStatusDetail, GameOk) = ("Not found", "Set the game folder in Settings", false);
+            (LoaderStatus, LoaderStatusDetail, LoaderOk) = ("-", "", true);
+            (ModsStatus, ModsStatusDetail, ModsOk) = ("-", "", true);
+            return;
+        }
+
+        string gameVersion = ModScanner.ReadGameVersion(gamePath);
+        GameStatus = GamePlatform == Platform.NONE ? "Standalone" : GamePlatform.ToString();
+        GameStatusDetail = gameVersion.Length > 0 ? $"Build {gameVersion}" : gamePath;
+        GameOk = true;
+
+        string loaderVersion = ModScanner.ReadLoaderVersion(gamePath);
+        (LoaderStatus, LoaderStatusDetail, LoaderOk) = loaderVersion.Length > 0 ? ("Installed", $"BepInEx {loaderVersion}", true) : ("Not installed", "Needed for mods", true);
+
+        ModManifest manifest = await ModManagerService.ScanAsync(gamePath);
+        int problems = ModManagerService.CheckLocal(manifest).Count(i => i.Severity == ModIssueSeverity.ERROR);
+        bool pending = ModManagerService.LoadPending(gamePath) != null;
+        ModsStatus = $"{manifest.Packages.Count} installed";
+        ModsStatusDetail = pending ? "Downloaded mods waiting to install" : problems > 0 ? $"{problems} problem(s) found" : manifest.Packages.Count > 0 ? "No problems found" : "Vanilla game";
+        ModsOk = problems == 0 && !pending;
+    }
+
+    [RelayCommand]
+    private void OpenSettings() => ChangeView(optionsViewModel);
+
+    [RelayCommand]
+    private void OpenMods() => ChangeView(modsViewModel);
+
+    [RelayCommand]
+    private void OpenMultiplayer() => ChangeView(serversViewModel);
 
     internal override Task ViewContentUnloadAsync()
     {
@@ -132,6 +210,9 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
                 }
 
                 await OfferBepInExInstallAsync(NitroxUser.GamePath);
+
+                // Mods downloaded from a server while the game was running are installed now, before BepInEx loads plugins.
+                await ModManagerService.OfferPendingInstallAsync(NitroxUser.GamePath, dialogService);
 
                 // TODO: The launcher should override FileRead win32 API for the Subnautica process to give it the modified Assembly-CSharp from memory
                 NitroxEntryPatch.TraceStep("StartMultiplayerAsync: before patcher dll copy");
@@ -224,9 +305,19 @@ internal partial class LaunchGameViewModel(DialogService dialogService, ServerSe
             return;
         }
 
-        await bepInExInstaller.InstallAsync(gamePath);
+        // Remember the answer before installing: a failed download must not re-prompt on every launch.
         keyValueStore.SetValue(BepInExPromptedKey, true);
-        LauncherNotifier.Success("BepInEx is installed and will load when Subnautica starts.");
+        try
+        {
+            await bepInExInstaller.InstallAsync(gamePath);
+            LauncherNotifier.Success("BepInEx is installed and will load when Subnautica starts.");
+        }
+        catch (Exception ex)
+        {
+            // BepInEx is optional for multiplayer, so a failed (e.g. offline) install must not block starting the game.
+            Log.Error(ex, "Failed to install BepInEx");
+            LauncherNotifier.Warning($"BepInEx could not be installed ({ex.Message}). Starting without it; you can install it later from Options.");
+        }
     }
 
     [RelayCommand]

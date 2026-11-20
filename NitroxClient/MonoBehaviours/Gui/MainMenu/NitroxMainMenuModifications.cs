@@ -1,4 +1,5 @@
 using NitroxClient.MonoBehaviours.Discord;
+using NitroxClient.MonoBehaviours.Gui.MainMenu.ModSync;
 using NitroxClient.MonoBehaviours.Gui.MainMenu.ServerJoin;
 using NitroxClient.MonoBehaviours.Gui.MainMenu.ServersList;
 using TMPro;
@@ -72,6 +73,9 @@ public class NitroxMainMenuModifications : MonoBehaviour
 
         GameObject serverCreate = CloneMainMenuLoadPanel(MainMenuCreateServerPanel.NAME, "Nitrox_AddServer");
         serverCreate.AddComponent<MainMenuCreateServerPanel>().Setup(savedGamesRef);
+
+        GameObject modSync = CloneMainMenuLoadPanel(MainMenuModSyncPanel.NAME, string.Empty);
+        modSync.AddComponent<MainMenuModSyncPanel>().Setup(savedGamesRef);
 
 #if RELEASE
             // Remove singleplayer button because SP is broken when Nitrox is injected.

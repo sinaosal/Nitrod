@@ -229,6 +229,6 @@ public abstract class MovementReplicator : MonoBehaviour
         {
             return gameObject.AddComponent<CyclopsMovementReplicator>();
         }
-        return gameObject.AddComponent<MovementReplicator>();
+        return gameObject.AddComponent<GenericVehicleMovementReplicator>();
     }
 }

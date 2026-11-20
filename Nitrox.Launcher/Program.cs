@@ -46,8 +46,10 @@ internal static class Program
         {
             Models.Utils.NitroxEntryPatch.Apply(args[argIndex + 1]).GetAwaiter().GetResult();
         }
-        catch
+        catch (Exception ex)
         {
+            // Logging isn't set up in the worker process, so record the failure in the trace file the UI points users to.
+            Models.Utils.NitroxEntryPatch.TraceStep($"Apply() failed: {ex}");
             exitCode = 1;
         }
         return true;

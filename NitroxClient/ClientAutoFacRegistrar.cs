@@ -115,6 +115,7 @@ namespace NitroxClient
             containerBuilder.RegisterType<SleepManager>().InstancePerLifetimeScope();
             containerBuilder.RegisterType<BulletManager>().InstancePerLifetimeScope();
             containerBuilder.RegisterType<NtpSyncer>().InstancePerLifetimeScope();
+            containerBuilder.RegisterType<ModSync.ModSyncClient>().InstancePerLifetimeScope();
         }
 
         private void RegisterMetadataDependencies(ContainerBuilder containerBuilder)

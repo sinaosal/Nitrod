@@ -49,14 +49,32 @@ public static class DataExtensions
         return new Vector4(v.X, v.Y, v.Z, v.W);
     }
 
+    /// <remarks>
+    ///     Uses the game's TechType string table instead of <see cref="Enum.ToString()" />. Mod frameworks such as Nautilus register
+    ///     the names of TechTypes they add at runtime in that table. Plain enum formatting can produce the numeric value for such
+    ///     TechTypes, and those numbers are assigned per installation, so they would map to different items on other machines.
+    /// </remarks>
     public static NitroxTechType ToDto(this TechType v)
     {
-        return new NitroxTechType(v.ToString());
+        return new NitroxTechType(v.AsString());
     }
 
+    /// <exception cref="ArgumentException">The TechType is not known on this machine, usually because a mod is missing.</exception>
     public static TechType ToUnity(this NitroxTechType v)
     {
-        return (TechType)Enum.Parse(typeof(TechType), v.Name);
+        if (TechTypeExtensions.FromString(v.Name, out TechType techType, false))
+        {
+            return techType;
+        }
+        // Vanilla names (and legacy data) still resolve through the enum itself.
+        try
+        {
+            return (TechType)Enum.Parse(typeof(TechType), v.Name);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new ArgumentException($"TechType '{v.Name}' is not registered in this game. This usually means a mod that adds it is not installed or failed to load.", nameof(v), ex);
+        }
     }
 
     public static Quaternion ToUnity(this NitroxQuaternion v)

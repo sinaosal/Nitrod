@@ -81,6 +81,25 @@ public sealed partial class SubnauticaServerOptions
     [PropertyDescription("Command to run following a successful world save (e.g. .exe, .bat, or PowerShell script). ")]
     public string PostSaveCommandPath { get; set; } = "";
 
+    [PropertyDescription("Share this server's BepInEx mod list (names, versions, file hashes) with joining players so they can check compatibility before joining.")]
+    public bool ModSyncEnabled { get; set; } = true;
+
+    [PropertyDescription("Let joining players download missing or different mod files directly from this server. Players always have to confirm first.")]
+    public bool ModSyncAllowDownloads { get; set; } = true;
+
+    [PropertyDescription("Ask players to have the same required mods before joining. Players with different mods can only join when this is off.")]
+    public bool ModSyncRequireMatchingMods { get; set; } = true;
+
+    [PropertyDescription("Mods players may skip (e.g. client-side UI mods). Comma separated plugin GUIDs or folder names, e.g. 'MiniMap, com.example.hud'.")]
+    public string ModSyncOptionalMods { get; set; } = "";
+
+    [PropertyDescription("Mods that are never shared or checked (e.g. host-only tools). Comma separated plugin GUIDs or folder names.")]
+    public string ModSyncExcludedMods { get; set; } = "";
+
+    [PropertyDescription("Maximum upload speed for mod downloads per player, in megabytes per second. 0 means unlimited.")]
+    [Range(0, 1000)]
+    public int ModSyncMaxUploadMegabytesPerSecond { get; set; } = 20;
+
     [OptionsValidator]
     public partial class Validator : IValidateOptions<SubnauticaServerOptions>;
 }

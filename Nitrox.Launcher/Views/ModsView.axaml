@@ -1,0 +1,240 @@
+<UserControl
+    x:Class="Nitrox.Launcher.Views.ModsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Nitrox.Launcher.ViewModels"
+    xmlns:design="clr-namespace:Nitrox.Launcher.Models.Design"
+    d:DesignWidth="1000"
+    d:DesignHeight="900"
+    x:DataType="vm:ModsViewModel"
+    mc:Ignorable="d">
+    <UserControl.Styles>
+        <!-- Section title + one-line description, shared by every section on this page. -->
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TextBlock.sub">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource BrandSubText}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <!-- List container: one flat panel with hairline separators instead of a card per row. -->
+        <Style Selector="Border.list">
+            <Setter Property="Background" Value="{DynamicResource BrandPanelBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
+        <Style Selector="Border.row">
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandBorder}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="Border.notice">
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandBorder}" />
+            <Setter Property="Background" Value="{DynamicResource BrandPanelBackground}" />
+        </Style>
+        <Style Selector="Border.notice.warning">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandWarning}" />
+        </Style>
+        <Style Selector="Border.notice.info">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandInformation}" />
+        </Style>
+        <Style Selector="Ellipse.status">
+            <Setter Property="Width" Value="8" />
+            <Setter Property="Height" Value="8" />
+            <Setter Property="Fill" Value="{DynamicResource BrandOnColor}" />
+        </Style>
+        <Style Selector="Ellipse.status.warning">
+            <Setter Property="Fill" Value="{DynamicResource BrandWarning}" />
+        </Style>
+        <Style Selector="Ellipse.status.error">
+            <Setter Property="Fill" Value="{DynamicResource BrandError}" />
+        </Style>
+        <Style Selector="Ellipse.status.off">
+            <Setter Property="Fill" Value="{DynamicResource BrandBorderBackground}" />
+        </Style>
+        <Style Selector="Border.tag">
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandBorder}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.tag > TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource BrandSubText}" />
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer Classes="main">
+        <StackPanel Classes="viewPadding" Background="{DynamicResource BrandWhite}" Spacing="24">
+            <!-- Header -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="header" Text="Mods" />
+                    <TextBlock Classes="sub" Text="{Binding Summary}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                    <Button Content="Refresh" Command="{Binding RefreshCommand}" ToolTip.Tip="Scan the BepInEx folder again" />
+                    <Button Content="Open folder" Command="{Binding OpenPluginsFolderCommand}" ToolTip.Tip="Open BepInEx/plugins" />
+                    <Button Classes="primary" Content="Install from ZIP" Command="{Binding InstallFromZipCommand}" ToolTip.Tip="Install a BepInEx mod archive" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Setup problems -->
+            <Border Classes="notice warning" IsVisible="{Binding ShowGameMissing}">
+                <TextBlock TextWrapping="Wrap" Text="Subnautica was not found. Set the installation folder in Settings to manage mods." />
+            </Border>
+            <Border Classes="notice warning" IsVisible="{Binding ShowLoaderMissing}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <TextBlock FontWeight="SemiBold" Text="BepInEx is not installed" />
+                        <TextBlock Classes="sub" Text="BepInEx is the mod loader. Without it, no mod in this list will load." />
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="primary" Content="Install BepInEx" Command="{Binding InstallBepInExCommand}" Margin="16,0,0,0" />
+                </Grid>
+            </Border>
+
+            <!-- Mods downloaded from a server, waiting for the game to be closed -->
+            <Border Classes="notice info" IsVisible="{Binding HasPending}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <TextBlock FontWeight="SemiBold" Text="Downloaded mods are waiting to be installed" />
+                        <TextBlock Classes="sub" Text="{Binding PendingSummary}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="16,0,0,0">
+                        <Button Content="Discard" Command="{Binding DiscardPendingCommand}" />
+                        <Button Classes="primary" Content="Install now" Command="{Binding InstallPendingCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Problems -->
+            <StackPanel Spacing="10" IsVisible="{Binding HasIssues}">
+                <TextBlock Classes="sectionTitle" Text="Problems" />
+                <Border Classes="list">
+                    <ItemsControl ItemsSource="{Binding Issues}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="design:ModIssueItem">
+                                <Border Classes="row">
+                                    <Grid ColumnDefinitions="20,*">
+                                        <Ellipse Classes="status" Classes.error="{Binding IsError}" Classes.warning="{Binding IsWarning}" VerticalAlignment="Top" Margin="0,6,0,0" />
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock FontWeight="SemiBold" Text="{Binding Title}" />
+                                            <TextBlock Classes="sub" Text="{Binding Detail}" />
+                                            <TextBlock Classes="sub" FontStyle="Italic" Text="{Binding Recommendation}" IsVisible="{Binding HasRecommendation}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </StackPanel>
+
+            <!-- Installed -->
+            <StackPanel Spacing="10" IsVisible="{Binding HasGame}">
+                <TextBlock Classes="sectionTitle" Text="Installed" />
+                <Border Classes="list">
+                    <Panel>
+                        <TextBlock Classes="sub" Margin="16,14" Text="No mods installed in BepInEx/plugins." IsVisible="{Binding !Packages.Count}" />
+                        <ItemsControl ItemsSource="{Binding Packages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="design:ModPackageItem">
+                                    <Border Classes="row">
+                                        <Grid ColumnDefinitions="20,*,Auto">
+                                            <Ellipse Classes="status" Classes.warning="{Binding IsWarning}" Classes.error="{Binding IsError}" Classes.off="{Binding !IsEnabled}"
+                                                     VerticalAlignment="Top" Margin="0,6,0,0" ToolTip.Tip="{Binding HealthText}" />
+                                            <StackPanel Grid.Column="1" Spacing="3">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                                                    <TextBlock Classes="sub" VerticalAlignment="Center" Text="{Binding Version}" IsVisible="{Binding HasVersion}" />
+                                                    <Border Classes="tag" IsVisible="{Binding IsSynced}">
+                                                        <TextBlock Text="{Binding SyncedFrom, StringFormat='Synced from {0}'}" />
+                                                    </Border>
+                                                    <Border Classes="tag" IsVisible="{Binding !IsEnabled}">
+                                                        <TextBlock Text="Disabled" />
+                                                    </Border>
+                                                </StackPanel>
+                                                <TextBlock Classes="sub">
+                                                    <Run Text="{Binding Location}" />
+                                                    <Run Text="  ·  " />
+                                                    <Run Text="{Binding PluginIds}" />
+                                                </TextBlock>
+                                                <TextBlock Classes="sub" IsVisible="{Binding HasDependencies}" Text="{Binding Dependencies, StringFormat='Requires {0}'}" />
+                                                <TextBlock Classes="sub" Foreground="{DynamicResource BrandWarning}" IsVisible="{Binding HasIssue}" Text="{Binding HealthText}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" Margin="16,0,0,0">
+                                                <TextBlock Classes="sub" VerticalAlignment="Center" Text="{Binding SizeText}" />
+                                                <!-- Plain string content: the global Button style enlarges explicit TextBlock children. -->
+                                                <Button MinWidth="80" Content="Disable" IsVisible="{Binding IsEnabled}"
+                                                        Command="{Binding $parent[ItemsControl].((vm:ModsViewModel)DataContext).ToggleCommand}" CommandParameter="{Binding}" />
+                                                <Button MinWidth="80" Content="Enable" IsVisible="{Binding !IsEnabled}"
+                                                        Command="{Binding $parent[ItemsControl].((vm:ModsViewModel)DataContext).ToggleCommand}" CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Panel>
+                </Border>
+            </StackPanel>
+
+            <!-- Synchronized from servers -->
+            <StackPanel Spacing="10" IsVisible="{Binding HasSyncedInstalls}">
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="sectionTitle" Text="Synchronized from servers" />
+                    <TextBlock Classes="sub" Text="Mods Nitrod downloaded from servers you joined. Undo removes them and restores the files they replaced." />
+                </StackPanel>
+                <Border Classes="list">
+                    <ItemsControl ItemsSource="{Binding SyncedInstalls}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="design:SyncRecordItem">
+                                <Border Classes="row">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock FontWeight="SemiBold" Text="{Binding ServerName}" />
+                                                <TextBlock Classes="sub" VerticalAlignment="Center" Text="{Binding ServerAddress}" />
+                                                <Border Classes="tag" IsVisible="{Binding Uninstalled}">
+                                                    <TextBlock Text="Undone" />
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Classes="sub" Text="{Binding Summary}" />
+                                            <TextBlock Classes="sub" Text="{Binding InstalledText, StringFormat='Installed {0}'}" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Content="Undo" VerticalAlignment="Center" Margin="16,0,0,0" IsVisible="{Binding CanUninstall}"
+                                                Command="{Binding $parent[ItemsControl].((vm:ModsViewModel)DataContext).UninstallSyncCommand}" CommandParameter="{Binding}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </StackPanel>
+
+            <!-- How synchronization works -->
+            <StackPanel Spacing="10">
+                <TextBlock Classes="sectionTitle" Text="Mod synchronization" />
+                <Border Classes="notice">
+                    <StackPanel Spacing="8">
+                        <TextBlock TextWrapping="Wrap" Text="When you join a server, Nitrod compares your mods with the host's before you enter the world." />
+                        <TextBlock Classes="sub" Text="• Downloads only happen after you confirm, come directly from the host, and are checked with SHA-256." />
+                        <TextBlock Classes="sub" Text="• Files are only written to BepInEx/plugins and BepInEx/patchers, and only while Subnautica is closed. Replaced files are backed up." />
+                        <TextBlock Classes="sub" Text="• Native code needs a separate approval. Programs and scripts are never downloaded, and Nitrod never runs downloaded files." />
+                        <TextBlock Classes="sub" Text="• Hosts choose what is shared, optional or excluded in the server settings (ModSync options)." />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

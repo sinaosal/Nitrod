@@ -15,7 +15,7 @@
     <Design.DataContext>
         <designer:DesignServersViewModel />
     </Design.DataContext>
-    <Panel Background="{DynamicResource BrandWhite}" Classes="viewPadding">
+    <Grid Background="{DynamicResource BrandWhite}" Classes="viewPadding" RowDefinitions="*,Auto">
         <Panel IsVisible="{Binding !Servers.Count}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image
@@ -170,5 +170,32 @@
                     x:Name="CreateServerBtn" />
             </Border>
         </Grid>
-    </Panel>
+
+        <!--  Joining: saved servers shared with the in-game Multiplayer menu.  -->
+        <Expander Grid.Row="1" Margin="0,16,0,0" HorizontalAlignment="Stretch" Header="Join a server">
+            <StackPanel Spacing="12" Margin="0,8,0,0">
+                <TextBlock FontSize="12" Foreground="{DynamicResource BrandSubText}" TextWrapping="Wrap"
+                           Text="Servers saved here appear in the in-game Multiplayer menu. Start the game from Home, open Multiplayer and pick the server. Nitrod checks your mods against the host's before you enter the world." />
+                <Grid ColumnDefinitions="2*,3*,90,Auto" ColumnSpacing="8">
+                    <TextBox Grid.Column="0" Watermark="Name" Text="{Binding NewServerName}" />
+                    <TextBox Grid.Column="1" Watermark="IP address or host name" Text="{Binding NewServerAddress}" />
+                    <TextBox Grid.Column="2" Watermark="Port" Text="{Binding NewServerPort}" />
+                    <Button Grid.Column="3" Classes="primary" Content="Save server" Command="{Binding AddSavedServerCommand}" />
+                </Grid>
+                <ItemsControl ItemsSource="{Binding SavedServers}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SavedServerItem">
+                            <Border BorderBrush="{DynamicResource BrandBorder}" BorderThickness="0,0,0,1" Padding="4,8">
+                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <SelectableTextBlock Grid.Column="1" Text="{Binding Endpoint}" FontSize="12" Foreground="{DynamicResource BrandSubText}" VerticalAlignment="Center" Margin="12,0" />
+                                    <Button Grid.Column="2" Content="Remove" Command="{Binding $parent[ItemsControl].((vm:ServersViewModel)DataContext).RemoveSavedServerCommand}" CommandParameter="{Binding}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Expander>
+    </Grid>
 </UserControl>

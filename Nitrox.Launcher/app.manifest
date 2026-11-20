@@ -5,10 +5,13 @@
        For more details visit https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests -->
   <assemblyIdentity version="1.0.0.0" name="NitroxLauncher.Desktop"/>
 
+  <!-- Run with the user's normal rights. Requiring admin made the game (a child process) and every downloaded/synced mod
+       run elevated too. If the game folder is not writable, OptionsViewModel asks the user to restart elevated once to fix
+       permissions instead. -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>
   </trustInfo>

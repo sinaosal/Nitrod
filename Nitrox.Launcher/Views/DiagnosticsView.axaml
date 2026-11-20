@@ -1,0 +1,185 @@
+<UserControl
+    x:Class="Nitrox.Launcher.Views.DiagnosticsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Nitrox.Launcher.ViewModels"
+    xmlns:design="clr-namespace:Nitrox.Launcher.Models.Design"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    d:DesignWidth="1000"
+    d:DesignHeight="900"
+    x:DataType="vm:DiagnosticsViewModel"
+    mc:Ignorable="d">
+    <UserControl.Styles>
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TextBlock.sub">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource BrandSubText}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Border.list">
+            <Setter Property="Background" Value="{DynamicResource BrandPanelBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
+        <Style Selector="Border.row">
+            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandBorder}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="SelectableTextBlock.mono">
+            <Setter Property="FontFamily" Value="Cascadia Mono,Consolas,Menlo,monospace" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Ellipse.status">
+            <Setter Property="Width" Value="8" />
+            <Setter Property="Height" Value="8" />
+            <Setter Property="Fill" Value="{DynamicResource BrandInformation}" />
+        </Style>
+        <Style Selector="Ellipse.status.warning">
+            <Setter Property="Fill" Value="{DynamicResource BrandWarning}" />
+        </Style>
+        <Style Selector="Ellipse.status.error">
+            <Setter Property="Fill" Value="{DynamicResource BrandError}" />
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer Classes="main">
+        <StackPanel Classes="viewPadding" Background="{DynamicResource BrandWhite}" Spacing="24">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="header" Text="Diagnostics" />
+                    <TextBlock Classes="sub" Text="What Nitrod knows about your setup. Copy it when asking for help." />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                    <Button Content="Refresh" Command="{Binding RefreshCommand}" />
+                    <Button Content="Open logs" Command="{Binding OpenLogsFolderCommand}" />
+                    <Button Classes="primary" Content="Copy diagnostics" Command="{Binding CopyDiagnosticsCommand}" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Environment -->
+            <StackPanel Spacing="10">
+                <TextBlock Classes="sectionTitle" Text="Environment" />
+                <Border Classes="list">
+                    <ItemsControl ItemsSource="{Binding Environment}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:DiagnosticEntry">
+                                <Border Classes="row">
+                                    <Grid ColumnDefinitions="160,*">
+                                        <TextBlock Classes="sub" Text="{Binding Label}" VerticalAlignment="Center" />
+                                        <SelectableTextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </StackPanel>
+
+            <!-- Mod problems -->
+            <StackPanel Spacing="10">
+                <TextBlock Classes="sectionTitle" Text="Mod problems" />
+                <Border Classes="list">
+                    <Panel>
+                        <TextBlock Classes="sub" Margin="16,12" Text="No missing dependencies, incompatibilities or duplicate plugins found." IsVisible="{Binding !HasModIssues}" />
+                        <ItemsControl ItemsSource="{Binding ModIssues}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="design:ModIssueItem">
+                                    <Border Classes="row">
+                                        <Grid ColumnDefinitions="20,*">
+                                            <Ellipse Classes="status" Classes.error="{Binding IsError}" Classes.warning="{Binding IsWarning}" VerticalAlignment="Top" Margin="0,6,0,0" />
+                                            <StackPanel Grid.Column="1" Spacing="2">
+                                                <TextBlock FontWeight="SemiBold" Text="{Binding Title}" />
+                                                <TextBlock Classes="sub" Text="{Binding Detail}" />
+                                                <TextBlock Classes="sub" FontStyle="Italic" Text="{Binding Recommendation}" IsVisible="{Binding HasRecommendation}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Panel>
+                </Border>
+            </StackPanel>
+
+            <!-- BepInEx errors -->
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="2">
+                        <TextBlock Classes="sectionTitle" Text="Mod loading errors" />
+                        <TextBlock Classes="sub" Text="Errors from BepInEx/LogOutput.log of the last game session." />
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Open BepInEx log" Command="{Binding OpenBepInExLogCommand}" VerticalAlignment="Bottom" />
+                </Grid>
+                <Border Classes="list" Padding="16,12">
+                    <Panel>
+                        <TextBlock Classes="sub" Text="No loading errors found." IsVisible="{Binding !HasLoaderErrors}" />
+                        <ItemsControl ItemsSource="{Binding LoaderErrors}" IsVisible="{Binding HasLoaderErrors}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="system:String">
+                                    <SelectableTextBlock Classes="mono" Margin="0,2" Text="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Panel>
+                </Border>
+            </StackPanel>
+
+            <!-- Last server compatibility check -->
+            <StackPanel Spacing="10">
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="sectionTitle" Text="Last server compatibility check" />
+                    <TextBlock Classes="sub" Text="Written when you join a server: how your mods compare with the host's." />
+                </StackPanel>
+                <Border Classes="list" Padding="16,12">
+                    <Panel>
+                        <TextBlock Classes="sub" Text="No server checked yet. Join a server from the in-game Multiplayer menu." IsVisible="{Binding !HasCompatibilityReport}" />
+                        <SelectableTextBlock Classes="mono" Text="{Binding CompatibilityReport}" IsVisible="{Binding HasCompatibilityReport}" />
+                    </Panel>
+                </Border>
+            </StackPanel>
+
+            <!-- Harmony overlaps -->
+            <StackPanel Spacing="10">
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="sectionTitle" Text="Patch overlaps" />
+                    <TextBlock Classes="sub" Text="Game methods patched by both Nitrod and other mods in the last multiplayer session. Start here when a mod breaks multiplayer." />
+                </StackPanel>
+                <Border Classes="list" Padding="16,12">
+                    <Panel>
+                        <TextBlock Classes="sub" Text="No report yet. It is created when you join a multiplayer session." IsVisible="{Binding !HasHarmonyReport}" />
+                        <SelectableTextBlock Classes="mono" Text="{Binding HarmonyReport}" IsVisible="{Binding HasHarmonyReport}" />
+                    </Panel>
+                </Border>
+            </StackPanel>
+
+            <!-- Logs -->
+            <StackPanel Spacing="10">
+                <TextBlock Classes="sectionTitle" Text="Recent logs" />
+                <Border Classes="list">
+                    <ItemsControl ItemsSource="{Binding LogFiles}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LogFileItem">
+                                <Border Classes="row">
+                                    <Grid ColumnDefinitions="*,Auto,Auto">
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Classes="sub" Text="{Binding ModifiedText}" VerticalAlignment="Center" Margin="16,0" />
+                                        <Button Grid.Column="2" Content="Open" Command="{Binding $parent[ItemsControl].((vm:DiagnosticsViewModel)DataContext).OpenLogCommand}" CommandParameter="{Binding}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

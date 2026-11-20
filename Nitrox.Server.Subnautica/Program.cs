@@ -116,6 +116,7 @@ internal sealed class Program
                .AddHostedSingletonService<MemoryService>()
                .AddHostedSingletonService<RestartService>()
                .AddHostedSingletonService<BanService>()
+               .AddHostedSingletonService<ModSyncService>()
                .AddHostedSingletonService<IProgressReporter, ServerLoadingProgressService>()
                .AddSingleton<RandomFactory>()
                .AddSingleton<NtpSyncer>()

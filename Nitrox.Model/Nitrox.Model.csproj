@@ -8,6 +8,8 @@
         <PackageReference Include="Autofac" />
         <PackageReference Include="LiteNetLib" />
         <PackageReference Include="MagicOnion.Abstractions" />
+        <!-- Explicit reference so every project gets a MessagePack version without known advisories (MagicOnion only requires >= 3.1.x). -->
+        <PackageReference Include="MessagePack" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
         <PackageReference Include="Microsoft.Win32.Registry" />
         <PackageReference Include="Mono.Nat" />

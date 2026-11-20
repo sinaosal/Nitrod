@@ -41,6 +41,18 @@ public class PlayerMovementBroadcaster : MonoBehaviour
 
         if (Player.main.isPiloting)
         {
+            Vehicle vehicle = Player.main.currentMountedVehicle;
+            if (vehicle)
+            {
+                Transform seat = vehicle.playerPosition ? vehicle.playerPosition.transform : vehicle.transform;
+                Vector3 vehiclePosition = seat.position;
+                Rigidbody vehicleRigidbody = vehicle.GetComponent<Rigidbody>();
+                Vector3 vehicleVelocity = vehicleRigidbody ? vehicleRigidbody.velocity : Vector3.zero;
+                Quaternion vehicleRotation = vehicle.transform.rotation;
+                Quaternion vehicleAimingRotation = Player.main.camRoot.GetAimingTransform().rotation;
+
+                localPlayer.BroadcastLocation(vehiclePosition, vehicleVelocity, vehicleRotation, vehicleAimingRotation);
+            }
             return;
         }
 

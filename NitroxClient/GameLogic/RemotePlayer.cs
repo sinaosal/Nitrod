@@ -151,6 +151,11 @@ public class RemotePlayer : INitroxPlayer
             return;
         }
 
+        if (Vehicle)
+        {
+            return;
+        }
+
         Body.SetActive(true);
 
         // When receiving movement packets, a player can not be controlling a vehicle (they can walk through subroots though).
@@ -294,7 +299,11 @@ public class RemotePlayer : INitroxPlayer
         {
             if (Vehicle)
             {
-                Vehicle.mainAnimator.SetBool(animatorPlayerIn, false);
+                // Modded vehicles (e.g. VehicleFramework) don't always have an animator or a seat transform.
+                if (Vehicle.mainAnimator)
+                {
+                    Vehicle.mainAnimator.SetBool(animatorPlayerIn, false);
+                }
 
                 Detach();
                 ArmsController.SetWorldIKTarget(null, null);
@@ -307,9 +316,12 @@ public class RemotePlayer : INitroxPlayer
 
             if (newVehicle)
             {
-                newVehicle.mainAnimator.SetBool(animatorPlayerIn, true);
+                if (newVehicle.mainAnimator)
+                {
+                    newVehicle.mainAnimator.SetBool(animatorPlayerIn, true);
+                }
 
-                Attach(newVehicle.playerPosition.transform);
+                Attach(newVehicle.playerPosition ? newVehicle.playerPosition.transform : newVehicle.transform);
                 ArmsController.SetWorldIKTarget(newVehicle.leftHandPlug, newVehicle.rightHandPlug);
 
                 // From here, a basic issue can happen.
@@ -323,6 +335,9 @@ public class RemotePlayer : INitroxPlayer
                         break;
                     case Exosuit:
                         newVehicle.gameObject.EnsureComponent<ExosuitMovementReplicator>().Enter(this);
+                        break;
+                    default:
+                        newVehicle.gameObject.EnsureComponent<GenericVehicleMovementReplicator>().Enter(this);
                         break;
                 }
 

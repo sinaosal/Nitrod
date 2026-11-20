@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -63,6 +64,65 @@ internal static class Patcher
         }
 
         isApplied = true;
+        ReportPatchOverlaps();
+    }
+
+    public const string HARMONY_OVERLAP_REPORT_FILE_NAME = "nitrod-harmony-overlaps.txt";
+
+    /// <summary>
+    ///     Lists game methods patched both by Nitrod and by other mods. These are the first places to look when a mod misbehaves in
+    ///     multiplayer: another mod's prefix can skip the code Nitrod relies on to sync, or a transpiler can change it.
+    ///     Written next to the logs so the launcher's Diagnostics page can show it.
+    /// </summary>
+    private static void ReportPatchOverlaps()
+    {
+        try
+        {
+            List<string> lines = [];
+            foreach (MethodBase method in Harmony.GetAllPatchedMethods())
+            {
+                HarmonyLib.Patches info = Harmony.GetPatchInfo(method);
+                if (info == null || !info.Owners.Contains(harmony.Id))
+                {
+                    continue;
+                }
+                string[] otherOwners = info.Owners.Where(owner => owner != harmony.Id).Distinct().ToArray();
+                if (otherOwners.Length == 0)
+                {
+                    continue;
+                }
+                List<string> kinds = [];
+                if (info.Prefixes.Any(p => p.owner != harmony.Id))
+                {
+                    kinds.Add("prefix (may skip the original)");
+                }
+                if (info.Transpilers.Any(p => p.owner != harmony.Id))
+                {
+                    kinds.Add("transpiler (rewrites the method)");
+                }
+                if (info.Postfixes.Any(p => p.owner != harmony.Id))
+                {
+                    kinds.Add("postfix");
+                }
+                lines.Add($"{method.DeclaringType?.FullName}.{method.Name}: {string.Join(", ", otherOwners)} [{string.Join(", ", kinds)}]");
+            }
+            lines.Sort(StringComparer.Ordinal);
+
+            string header = $"Methods patched by Nitrod and other mods ({lines.Count}), generated {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+            File.WriteAllLines(Path.Combine(Log.LogDirectory, HARMONY_OVERLAP_REPORT_FILE_NAME), [header, "", ..lines]);
+            if (lines.Count > 0)
+            {
+                Log.Info($"{header}. Details: {HARMONY_OVERLAP_REPORT_FILE_NAME}");
+                foreach (string line in lines)
+                {
+                    Log.Debug(line);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"Unable to report Harmony patch overlaps: {ex.Message}");
+        }
     }
 
     /// <summary>

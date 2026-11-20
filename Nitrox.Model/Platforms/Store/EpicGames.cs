@@ -18,6 +18,11 @@ public sealed class EpicGames : IGamePlatform
     public bool OwnsGame(string gameDirectory)
     {
         string path = Path.Combine(gameDirectory, ".egstore");
+        // Most installs aren't Epic installs; that is not an error worth a stack trace in the log on every launch.
+        if (!Directory.Exists(path))
+        {
+            return false;
+        }
 
         try
         {

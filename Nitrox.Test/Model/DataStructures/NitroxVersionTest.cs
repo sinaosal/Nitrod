@@ -25,14 +25,19 @@ public class NitroxVersionTest
     }
 
     [TestMethod]
-    [DataRow(1, 8, true)]
-    [DataRow(1, 9, true)]
-    [DataRow(1, 10, false)]
-    [DataRow(2, 8, false)]
-    public void NetworkCompatibility(int major, int minor, bool expected)
+    [DataRow(1, 9, 1, 8, true)]
+    [DataRow(1, 9, 1, 9, true)]
+    [DataRow(1, 9, 1, 10, false)]
+    [DataRow(1, 9, 2, 8, false)]
+    [DataRow(2, 0, 2, 0, true)]
+    // 2.x adds packets (mod sync), which shifts BinaryPack union indices, so it can never talk to 1.x builds.
+    [DataRow(2, 0, 1, 9, false)]
+    [DataRow(2, 0, 2, 1, false)]
+    public void NetworkCompatibility(int major, int minor, int otherMajor, int otherMinor, bool expected)
     {
-        NitroxVersion source = new(1, 9);
+        NitroxVersion source = new(major, minor);
 
-        source.IsNetworkCompatibleWith(new(major, minor)).Should().Be(expected);
+        source.IsNetworkCompatibleWith(new(otherMajor, otherMinor)).Should().Be(expected);
+        new NitroxVersion(otherMajor, otherMinor).IsNetworkCompatibleWith(source).Should().Be(expected);
     }
 }

@@ -14,7 +14,9 @@ using Nitrox.Launcher.Models.Utils;
 using Nitrox.Launcher.ViewModels.Abstract;
 using Nitrox.Model.Core;
 using Nitrox.Model.Helper;
+using Nitrox.Model.Constants;
 using Nitrox.Model.Logger;
+using Nitrox.Model.Serialization;
 
 namespace Nitrox.Launcher.ViewModels;
 
@@ -58,6 +60,81 @@ internal partial class ServersViewModel : RoutableViewModelBase
     internal override async Task ViewContentLoadAsync(CancellationToken cancellationToken = default)
     {
         Servers = [..await serverService.GetServersAsync()];
+        LoadSavedServers();
+    }
+
+    // Saved servers: the same list the in-game Multiplayer menu shows (servers file in the Nitrod config folder).
+    [ObservableProperty]
+    public partial AvaloniaList<SavedServerItem> SavedServers { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string NewServerName { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string NewServerAddress { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string NewServerPort { get; set; } = SubnauticaServerConstants.DEFAULT_PORT.ToString();
+
+    private void LoadSavedServers()
+    {
+        try
+        {
+            SavedServers = new AvaloniaList<SavedServerItem>(ServerList.From().Entries.Select((e, i) => new SavedServerItem(i, e.Name, e.Address, e.Port)));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Error(ex, "Unable to read saved servers");
+        }
+    }
+
+    [RelayCommand]
+    private void AddSavedServer()
+    {
+        string name = NewServerName.Trim();
+        string address = NewServerAddress.Trim();
+        if (name.Length == 0 || address.Length == 0 || address.Contains('|') || name.Contains('|'))
+        {
+            LauncherNotifier.Error("Enter a name and an IP address or host name.");
+            return;
+        }
+        if (!int.TryParse(NewServerPort, out int port) || port is < 1 or > ushort.MaxValue)
+        {
+            LauncherNotifier.Error("The port must be a number between 1 and 65535.");
+            return;
+        }
+        if (Uri.CheckHostName(address) == UriHostNameType.Unknown)
+        {
+            LauncherNotifier.Error($"'{address}' is not a valid IP address or host name.");
+            return;
+        }
+        ServerList list = ServerList.From();
+        list.Add(new ServerList.Entry(name, address, port));
+        list.Save();
+        ServerList.Refresh();
+        NewServerName = "";
+        NewServerAddress = "";
+        NewServerPort = SubnauticaServerConstants.DEFAULT_PORT.ToString();
+        LoadSavedServers();
+        LauncherNotifier.Success($"Saved {name}. It appears in the in-game Multiplayer menu.");
+    }
+
+    [RelayCommand]
+    private void RemoveSavedServer(SavedServerItem? item)
+    {
+        if (item == null)
+        {
+            return;
+        }
+        ServerList list = ServerList.From();
+        int index = list.Entries.ToList().FindIndex(e => e.Name == item.Name && e.Address == item.Address && e.Port == item.Port);
+        if (index >= 0)
+        {
+            list.RemoveAt(index);
+            list.Save();
+            ServerList.Refresh();
+        }
+        LoadSavedServers();
     }
 
     [RelayCommand(AllowConcurrentExecutions = false)]
@@ -104,4 +181,9 @@ internal partial class ServersViewModel : RoutableViewModelBase
         await manageServerViewModel.RefreshAndLoadFromAsync(server);
         ChangeView(manageServerViewModel);
     }
+}
+
+internal sealed record SavedServerItem(int Index, string Name, string Address, int Port)
+{
+    public string Endpoint => $"{Address}:{Port}";
 }

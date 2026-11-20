@@ -6,6 +6,7 @@ using NitroxClient.Communication.Abstract;
 using NitroxClient.Communication.Exceptions;
 using NitroxClient.Communication.MultiplayerSession;
 using NitroxClient.GameLogic.PlayerLogic.PlayerPreferences;
+using NitroxClient.ModSync;
 using NitroxClient.MonoBehaviours.Gui.InGame;
 using NitroxClient.MonoBehaviours.Gui.MainMenu.ServersList;
 using Nitrox.Model.Core;
@@ -39,6 +40,46 @@ public static class JoinServerBackend
         multiplayerSession.RequestSessionReservation(new PlayerSettings(playerColor.ToDto()), authenticationContext);
     }
 
+    /// <summary>Server ("ip:port") whose mods were already checked in this join attempt, so reconnects after a rejection skip it.</summary>
+    private static string modCheckPassedFor;
+
+    private static void ShowCredentialsInputIfStillWaiting()
+    {
+        // The player may have backed out or been disconnected while reading the mod dialog.
+        if (multiplayerSession?.CurrentState.CurrentStage == MultiplayerSessionConnectionStage.AWAITING_RESERVATION_CREDENTIALS)
+        {
+            ShowCredentialsInput();
+        }
+    }
+
+    private static void ShowCredentialsInput()
+    {
+        Color.RGBToHSV(activePlayerPreference.PreferredColor(), out float hue, out float saturation, out float brightness); // HSV => Hue Saturation Value, HSB => Hue Saturation Brightness
+        MainMenuJoinServerPanel.Instance.UpdatePlayerPanelValues(activePlayerPreference.PlayerName, new Vector3(hue, saturation, brightness));
+
+        if (multiplayerSession.SessionPolicy.RequiresServerPassword)
+        {
+            Log.Info("Waiting for server password input");
+            Log.InGame(Language.main.Get("Nitrox_WaitingPassword"));
+            MainMenuEnterPasswordPanel.ResetLastEnteredPassword();
+            MainMenuRightSide.main.OpenGroup(MainMenuEnterPasswordPanel.NAME);
+            MainMenuEnterPasswordPanel.Instance.FocusPasswordField();
+            return;
+        }
+
+        Log.Info("Waiting for user input");
+        Log.InGame(Language.main.Get("Nitrox_WaitingUserInput"));
+        MainMenuRightSide.main.OpenGroup(MainMenuJoinServerPanel.NAME);
+        MainMenuJoinServerPanel.Instance.FocusNameInputField();
+    }
+
+    private static void AbortJoinToServerList()
+    {
+        modCheckPassedFor = null;
+        StopMultiplayerClient();
+        MainMenuRightSide.main.OpenGroup(MainMenuServerListPanel.NAME);
+    }
+
     private static void SessionConnectionStateChangedHandler(IMultiplayerSessionConnectionState state)
     {
         switch (state.CurrentStage)
@@ -49,23 +90,25 @@ public static class JoinServerBackend
                 break;
 
             case MultiplayerSessionConnectionStage.AWAITING_RESERVATION_CREDENTIALS:
-                Color.RGBToHSV(activePlayerPreference.PreferredColor(), out float hue, out float saturation, out float brightness); // HSV => Hue Saturation Value, HSB => Hue Saturation Brightness
-                MainMenuJoinServerPanel.Instance.UpdatePlayerPanelValues(activePlayerPreference.PlayerName, new Vector3(hue, saturation, brightness));
-
-                if (multiplayerSession.SessionPolicy.RequiresServerPassword)
+                // Compare mods with the host before asking for a name, once per server we connect to.
+                string serverKey = $"{serverIp}:{serverPort}";
+                if (modCheckPassedFor == serverKey)
                 {
-                    Log.Info("Waiting for server password input");
-                    Log.InGame(Language.main.Get("Nitrox_WaitingPassword"));
-                    MainMenuEnterPasswordPanel.ResetLastEnteredPassword();
-                    MainMenuRightSide.main.OpenGroup(MainMenuEnterPasswordPanel.NAME);
-                    MainMenuEnterPasswordPanel.Instance.FocusPasswordField();
+                    ShowCredentialsInput();
                     break;
                 }
-
-                Log.Info("Waiting for user input");
-                Log.InGame(Language.main.Get("Nitrox_WaitingUserInput"));
-                MainMenuRightSide.main.OpenGroup(MainMenuJoinServerPanel.NAME);
-                MainMenuJoinServerPanel.Instance.FocusNameInputField();
+                ModSyncJoinFlow.RunAsync(serverKey, () =>
+                               {
+                                   modCheckPassedFor = serverKey;
+                                   ShowCredentialsInputIfStillWaiting();
+                               }, AbortJoinToServerList)
+                               .ContinueWithHandleError(ex =>
+                               {
+                                   // A bug in the mod check must not lock players out of servers.
+                                   Log.Error(ex, "Mod compatibility check failed; continuing to join");
+                                   modCheckPassedFor = serverKey;
+                                   ShowCredentialsInputIfStillWaiting();
+                               });
                 break;
 
             case MultiplayerSessionConnectionStage.SESSION_RESERVED:
@@ -116,6 +159,7 @@ public static class JoinServerBackend
     {
         serverIp = ip.ToString();
         serverPort = port;
+        modCheckPassedFor = null; // A new join attempt always re-checks mods; the player may have changed them.
         NitroxServiceLocator.BeginNewLifetimeScope();
 
         preferencesManager = NitroxServiceLocator.LocateService<PlayerPreferenceManager>();

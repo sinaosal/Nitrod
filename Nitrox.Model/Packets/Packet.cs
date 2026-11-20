@@ -142,10 +142,20 @@ namespace Nitrox.Model.Packets
             public Packet? Packet { get; init; } = packet;
         }
 
+        /// <remarks>
+        ///     Client and server create one LiteNetLib channel per value, so adding values changes the protocol (bump the version).
+        /// </remarks>
         public enum UdpChannelId : byte
         {
             DEFAULT = 0,
             MOVEMENTS = 1,
+
+            // Mod file transfers use their own reliable channels so large downloads never delay game packets on DEFAULT.
+            // Measured against a real server on localhost: ~3 MB/s with 4 channels; 8 channels were not faster.
+            MOD_SYNC_0 = 2,
+            MOD_SYNC_1 = 3,
+            MOD_SYNC_2 = 4,
+            MOD_SYNC_3 = 5
         }
     }
 }

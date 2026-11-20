@@ -32,11 +32,99 @@
             </Panel>
 
             <Grid ColumnDefinitions="*,*">
-                <TextBlock
-                    Grid.Column="0"
-                    Margin="0,0,20,0"
-                    FontSize="14"
-                    Text="Nitrod is a fork of Nitrox, an open-source Subnautica multiplayer modification. Main contributors to this fork: Sinaosal (code) and Prosims (logo)." />
+                <StackPanel Grid.Column="0" Margin="0,0,20,0" Spacing="18">
+                    <StackPanel.Styles>
+                        <Style Selector="Button.statusTile">
+                            <Setter Property="HorizontalAlignment" Value="Stretch" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="14,10" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource BrandBorder}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="CornerRadius" Value="8" />
+                            <Setter Property="Cursor" Value="Hand" />
+                        </Style>
+                        <Style Selector="Button.statusTile:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="{DynamicResource BrandPanelBackground}" />
+                        </Style>
+                        <Style Selector="Ellipse.status">
+                            <Setter Property="Width" Value="8" />
+                            <Setter Property="Height" Value="8" />
+                            <Setter Property="Fill" Value="{DynamicResource BrandOnColor}" />
+                        </Style>
+                        <Style Selector="Ellipse.status.attention">
+                            <Setter Property="Fill" Value="{DynamicResource BrandWarning}" />
+                        </Style>
+                        <Style Selector="Button.statusTile TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Left" />
+                            <Setter Property="TextAlignment" Value="Left" />
+                        </Style>
+                        <Style Selector="TextBlock.tileLabel">
+                            <Setter Property="FontSize" Value="10" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter Property="Foreground" Value="{DynamicResource BrandSubText}" />
+                        </Style>
+                        <Style Selector="TextBlock.tileValue">
+                            <Setter Property="FontSize" Value="15" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Style>
+                        <Style Selector="TextBlock.tileDetail">
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="Foreground" Value="{DynamicResource BrandSubText}" />
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                        </Style>
+                    </StackPanel.Styles>
+                    <TextBlock
+                        FontSize="14"
+                        TextWrapping="Wrap"
+                        Text="Nitrod is a fork of Nitrox, an open-source Subnautica multiplayer modification. Main contributors to this fork: Sinaosal (code) and Prosims (logo)." />
+                    <!--  Setup at a glance. Each tile opens the page where the item can be fixed.  -->
+                    <UniformGrid Columns="2" RowSpacing="10" ColumnSpacing="10">
+                        <Button Classes="anycontent statusTile" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Game installation (Settings)">
+                            <Grid ColumnDefinitions="14,*">
+                                <Ellipse Classes="status" Classes.attention="{Binding !GameOk}" VerticalAlignment="Top" Margin="0,4,0,0" />
+                                <!-- Grid rows, not a StackPanel: the global Button style makes StackPanels inside buttons horizontal. -->
+                                <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto">
+                                    <TextBlock Grid.Row="0" Classes="tileLabel" Text="GAME" />
+                                    <TextBlock Grid.Row="1" Classes="tileValue" Text="{Binding GameStatus}" />
+                                    <TextBlock Grid.Row="2" Classes="tileDetail" Text="{Binding GameStatusDetail}" />
+                                </Grid>
+                            </Grid>
+                        </Button>
+                        <Button Classes="anycontent statusTile" Command="{Binding OpenModsCommand}" ToolTip.Tip="Mod loader (Mods)">
+                            <Grid ColumnDefinitions="14,*">
+                                <Ellipse Classes="status" Classes.attention="{Binding !LoaderOk}" VerticalAlignment="Top" Margin="0,4,0,0" />
+                                <!-- Grid rows, not a StackPanel: the global Button style makes StackPanels inside buttons horizontal. -->
+                                <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto">
+                                    <TextBlock Grid.Row="0" Classes="tileLabel" Text="BEPINEX" />
+                                    <TextBlock Grid.Row="1" Classes="tileValue" Text="{Binding LoaderStatus}" />
+                                    <TextBlock Grid.Row="2" Classes="tileDetail" Text="{Binding LoaderStatusDetail}" />
+                                </Grid>
+                            </Grid>
+                        </Button>
+                        <Button Classes="anycontent statusTile" Command="{Binding OpenModsCommand}" ToolTip.Tip="Installed mods and their problems (Mods)">
+                            <Grid ColumnDefinitions="14,*">
+                                <Ellipse Classes="status" Classes.attention="{Binding !ModsOk}" VerticalAlignment="Top" Margin="0,4,0,0" />
+                                <!-- Grid rows, not a StackPanel: the global Button style makes StackPanels inside buttons horizontal. -->
+                                <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto">
+                                    <TextBlock Grid.Row="0" Classes="tileLabel" Text="MODS" />
+                                    <TextBlock Grid.Row="1" Classes="tileValue" Text="{Binding ModsStatus}" />
+                                    <TextBlock Grid.Row="2" Classes="tileDetail" Text="{Binding ModsStatusDetail}" />
+                                </Grid>
+                            </Grid>
+                        </Button>
+                        <Button Classes="anycontent statusTile" Command="{Binding OpenMultiplayerCommand}" ToolTip.Tip="Hosted servers (Multiplayer)">
+                            <Grid ColumnDefinitions="14,*">
+                                <Ellipse Classes="status" Classes.attention="{Binding !GameOk}" VerticalAlignment="Top" Margin="0,4,0,0" />
+                                <!-- Grid rows, not a StackPanel: the global Button style makes StackPanels inside buttons horizontal. -->
+                                <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto">
+                                    <TextBlock Grid.Row="0" Classes="tileLabel" Text="SERVER" />
+                                    <TextBlock Grid.Row="1" Classes="tileValue" Text="{Binding ServerStatus}" />
+                                    <TextBlock Grid.Row="2" Classes="tileDetail" Text="{Binding ServerStatusDetail}" />
+                                </Grid>
+                            </Grid>
+                        </Button>
+                    </UniformGrid>
+                </StackPanel>
                 <!--  Play buttons - Negative offset to add some overlap with the background image  -->
                 <StackPanel Grid.Column="1" Margin="0,-110,0,0">
                     <Border ClipToBounds="True" CornerRadius="10">
