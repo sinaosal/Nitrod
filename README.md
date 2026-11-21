@@ -1,63 +1,81 @@
-<p align="center">
-    <img src="https://i.imgur.com/ofnNX5z.gif" alt="Nitrox Subnautica Multiplayer Mod" />
-</p>
+# Nitrod
 
-# Subnautica Nitrox
-An open-source, multiplayer modification for the game <a href="https://unknownworlds.com/subnautica/">Subnautica</a>.
+Subnautica multiplayer built for modded games. Nitrod is a fork of [Nitrox](https://github.com/SubnauticaNitrox/Nitrox), the open-source multiplayer mod for [Subnautica](https://unknownworlds.com/subnautica/), with a focus on playing together with BepInEx mods.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/SubnauticaNitrox/Nitrox)](https://github.com/SubnauticaNitrox/Nitrox/releases)
-[![Translation status](https://hosted.weblate.org/widgets/subnauticanitrox/-/svg-badge.svg)](https://hosted.weblate.org/engage/subnauticanitrox/)
-[![Discord](https://img.shields.io/discord/525437013403631617?logo=discord&logoColor=white)](https://discord.gg/E8B4X9s)
-[![Build](https://github.com/SubnauticaNitrox/Nitrox/actions/workflows/buildingMaster.yml/badge.svg)](https://github.com/SubnauticaNitrox/Nitrox/actions/workflows/buildingMaster.yml)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/sinaosal/Nitrod)](https://github.com/sinaosal/Nitrod/releases)
 
-## FAQ
+## What Nitrod adds
 
-### What is the current status?
-The mod is in the very early stages of development; however, a solid foundation has been laid for the community to iterate on.
-The following milestones have been completed:
+- **Mod sync.** When you join a server, Nitrod compares your BepInEx mods with the host's. If something is missing or different, you can download the host's mods directly from the host, after confirming. Every file is checked, installed the next time you start the game, and can be undone.
+- **Compatibility checks.** Missing mods, different versions, missing dependencies, incompatible plugins and game/BepInEx version differences are explained before you enter the world.
+- **A launcher for modded play.** Mods page (installed mods, problems, enable/disable, install from ZIP, undo synced mods), Diagnostics page (logs, mod loading errors, compatibility reports, one-click copy for support), status at a glance on Home, and saved servers by IP.
+- **Better mod support in multiplayer.** Modded vehicles (e.g. VehicleFramework subs) are replicated, custom items from mods are sent between players correctly, and mods can sync their own state through [`NitrodModApi`](docs/NITROD-MOD-API.md).
+- **Live status for hosts.** The server console shows who is checking mods and how fast downloads are going.
 
-* Client / Server Communication
-* Player movement
-* Picking up / Dropping item syncing
-* Long-range world syncing
-* Base building
-* Furniture building
-* Most furniture interactions (containers / medkit fabricators / chargers / etc)
-* Power management
-* Seamoth & Exosuit Syncing
-* Cyclops syncing
-* Chat system
-* New HUD for remote players
-* Basic player animations
-* Integration with <a href="https://github.com/pardeike/Harmony">Harmony</a>
-* Friendly Launcher
-* Published on the <a href="https://nitrox.rux.gg">Nitrox website</a>
+Everything Nitrox syncs is still there: players, items, building, bases, vehicles, the Cyclops, story progress, chat and more.
 
-### How can I play this mod?
-Please do keep in mind that this mod is still in progressional development.
+## Getting started
 
-You can download the latest release of the mod on the <a href="https://nitrox.rux.gg">Nitrox website</a>. 
-For read-only Linux distros like SteamOS <a href="https://github.com/SubnauticaNitrox/Linux-Setup-Script">see this install script</a>.
+1. Download the latest ZIP from [Releases](https://github.com/sinaosal/Nitrod/releases).
+2. Extract it into a folder and run `Nitrod.Launcher.exe`.
+3. If Subnautica isn't found automatically, set its folder under **Settings**.
+4. Press **Play**. Nitrod offers to install [BepInEx](https://github.com/toebeann/BepInEx.Subnautica) if you want to use mods.
 
-If you want to follow the development progress exactly on each pull request. Refer to the <a href="https://subnauticanitrox.github.io/Documentation/">docs</a> to set up a development environment where pushed updates will be synchronized automatically.
+You need a copy of Subnautica (Steam, Epic Games or Microsoft Store) and Windows. All players must use the same Nitrod version line (2.0.x players can't join 1.x servers).
 
-### Problems/bugs/issues
-Due to the huge influx of new players for Subnautica the Issue tracker turned into a forum instead of its actual purpose. Please join the <a href="https://discord.gg/E8B4X9s">Nitrox Discord</a> to discuss any and all issues you have with Nitrox. From there we'll pick up on new issues to track.
+### Hosting with mods
 
-Keep in mind that your issue may already exist. Please refer to the existing issues on Discord if you want to add new information about existing issues. You can peruse the existing issues <a href="https://github.com/SubnauticaNitrox/Nitrox/issues">here on Github</a>.
+1. Install your mods in Subnautica's `BepInEx/plugins` folder (or with **Mods → Install from ZIP**).
+2. Create and start a server under **Multiplayer**. The server console lists the mods it shares.
+3. Optional: in the server settings, mark client-side mods as optional (`ModSyncOptionalMods`), keep host-only tools private (`ModSyncExcludedMods`), or turn sharing off.
 
-### Translations
-We have a translation platform for those of you who speak another language to work on translating the mod into your native language. You can get started at https://hosted.weblate.org/engage/subnauticanitrox/.
+### Joining
 
-You'll need to sign up to start translating to a new language, or you can suggest translations for an existing language without an account (but someone with an account will have to manually verify your suggestions). This will send an email to the address you provide. Be sure check your spam folder, as Gmail can sometimes put the emails there.
+1. Add the server under **Multiplayer → Join a server**, or in-game under **Multiplayer**.
+2. Press **Play**, open **Multiplayer** and pick the server.
+3. If your mods differ from the host's, Nitrod shows what's missing and the download size. Accept, wait for the download, quit the game, press **Play** in the launcher again, and join.
 
+## Is mod sync safe?
 
-### How can I contribute?
-Simply submit a pull request. Full documentation & contribution guidelines can be found on the <a href="https://subnauticanitrox.github.io/Documentation/">documentation site</a>. Feel free to join us in the <a href="https://discord.gg/E8B4X9s">Nitrox Discord channel</a>.
+Mods are code, and they come from the host's computer, so only accept downloads from hosts you trust. Nitrod's safeguards:
 
-### How can I donate?
-We do not accept donations to the mod.  Those wishing to give money can do so here: https://www.doctorswithoutborders.org/
+- Nothing downloads or installs without your confirmation.
+- Files can only go into `BepInEx/plugins` and `BepInEx/patchers`, and every file is checked with SHA-256 before it's installed.
+- Programs and scripts are never downloaded, and native code needs a separate approval.
+- Mods are installed only while the game is closed. Replaced files are backed up, and **Undo** under **Mods** restores them.
 
-### Why the name 'Nitrox'?
-Nitrox is an alternative air mixture, used by scuba divers, to achieve longer bottom times. As a mod, it will provide a new dimension of gameplay to extend your enjoyment.
+Details: [docs/NITROD.md](docs/NITROD.md#mod-synchronization).
+
+## Which mods work?
+
+Most mods load fine. Whether a mod works *together* in multiplayer depends on what it does:
+
+- **Items, equipment, recipes, buildables:** usually work when everyone has the same mods, which mod sync takes care of.
+- **Modded vehicles:** movement is synced; special abilities of a modded vehicle may not be.
+- **Mods with their own story, events, creatures or spawns** (e.g. The Red Plague, The Prototype): they load, but their custom events run separately for each player.
+
+The full notes are in [docs/NITROD.md](docs/NITROD.md#mod-compatibility). Mod authors can make their mods multiplayer-aware with the [Nitrod mod API](docs/NITROD-MOD-API.md).
+
+## Problems and bugs
+
+Open an issue on [GitHub](https://github.com/sinaosal/Nitrod/issues). In the launcher, **Diagnostics → Copy diagnostics** collects your setup, mod errors and the last compatibility check; paste it into the issue (it contains folder paths, so check it first).
+
+## Building from source
+
+Requires the .NET 10 SDK and an installed copy of Subnautica (the build references the game's files).
+
+```powershell
+dotnet build Nitrox.slnx -c Release
+dotnet test Nitrox.Test/Nitrox.Test.csproj
+```
+
+The launcher is built to `Nitrox.Launcher/bin/Release/net10.0/Nitrod.Launcher.exe`. More in [docs/NITROD.md](docs/NITROD.md#building).
+
+## Credits and license
+
+Nitrod is built on [Nitrox](https://github.com/SubnauticaNitrox/Nitrox) by Sunrunner and the Nitrox contributors. All credit for the multiplayer foundation goes to them; please don't report Nitrod issues to the Nitrox team.
+
+Nitrod fork: Sinaosal (code), Prosims (logo).
+
+Licensed under the [GNU GPL v3](LICENSE.txt), like Nitrox. Subnautica is a trademark of Unknown Worlds Entertainment; Nitrod is not affiliated with or endorsed by them.
